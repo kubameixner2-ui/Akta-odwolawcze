@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pl">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Akta odwoławcze · PDF → JSON</title>
+<style>
+*{box-sizing:border-box} :root{color-scheme:light;--ink:#142e2a;--paper:#f7f5ed;--rule:#bdc8bd;--brand:#125545}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 Inter,system-ui,sans-serif}
+main{max-width:1550px;margin:auto;padding:clamp(18px,4vw,66px)}
+header{border-top:5px solid var(--ink);padding:22px 0;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+h1{font:500 clamp(2.3rem,4.4vw,5rem)/1 "STIX Two Text",Georgia,serif;margin:0;letter-spacing:-.045em}
+.format,output{font:14px "IBM Plex Mono",monospace}.format{letter-spacing:.08em}
+.bar{border-block:1px solid var(--rule);padding:14px 0;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+input{max-width:100%;color:var(--ink)} input::file-selector-button,button,a{font:600 14px Inter,system-ui,sans-serif;cursor:pointer;border-radius:3px}
+input::file-selector-button{padding:10px 16px;margin-right:12px;border:1px solid var(--rule);background:white;color:var(--ink)}
+button{background:var(--brand);color:white;border:0;padding:12px 22px}button:disabled{background:#dce3db;color:#4c6358;cursor:default}
+.grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px;margin-top:26px}
+.pane{display:flex;flex-direction:column;min-width:0}.pane header{border:0;padding:0 0 10px;min-height:40px;align-items:center}
+h2{font:500 24px/1.1 "STIX Two Text",Georgia,serif;margin:0}.surface{height:clamp(350px,63vh,850px);border:1px solid var(--rule);background:white;overflow:auto}
+.paper{display:grid;align-items:start;justify-items:center;background:#e7e9e1}.paper span{align-self:center;padding:18px;color:#56645e}.paper img{display:block;width:100%;height:auto;background:white}
+.json{background:#132e29;color:#daf1df;border-color:var(--ink)}pre{white-space:pre-wrap;overflow-wrap:anywhere;padding:20px;margin:0;font:14px/1.65 "IBM Plex Mono",Consolas,monospace}
+a{color:var(--brand);text-underline-offset:3px}[hidden]{display:none!important}:focus-visible{outline:3px solid #c16a21;outline-offset:3px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.surface{height:46vh}output{width:100%}}
+</style>
+<main>
+<header><h1>Akta odwoławcze</h1><span class="format">PDF → JSON</span></header>
+<div class="bar"><input aria-label="Wybierz dokument PDF" type="file" id="file" accept=".pdf,application/pdf"><button id="go" disabled>Analizuj</button><output id="status" aria-live="polite"></output></div>
+<div class="grid">
+<section class="pane"><header><h2>Dokument</h2><a id="original" hidden target="_blank" rel="noopener">Otwórz cały PDF</a></header><div class="surface paper"><span id="empty">Wybierz PDF do analizy.</span><img alt="Pierwsza strona wybranego PDF" id="pdf" hidden></div></section>
+<section class="pane"><header><h2>Wynik</h2><a id="download" hidden>Pobierz JSON</a></header><div class="surface json"><pre id="json" aria-label="Wynik JSON"></pre></div></section>
+</div></main>
+<script>
+const byId = id => document.getElementById(id);
+const file = byId('file'), go = byId('go'), result = byId('json'), pdf = byId('pdf'), link = byId('download'), status = byId('status');
+let pdfUrl, jsonUrl, imageUrl;
+file.onchange = async () => {
+  for (const url of [pdfUrl, jsonUrl, imageUrl]) if (url) URL.revokeObjectURL(url);
+  const selected = file.files[0];
+  go.disabled = !selected; pdf.hidden = true; byId('empty').hidden = false;
+  byId('original').hidden = !selected; byId('empty').textContent = selected ? 'Wczytywanie podglądu…' : 'Wybierz PDF do analizy.';
+  result.textContent = ''; status.textContent = ''; link.hidden = true;
+  if (!selected) return;
+  pdfUrl = URL.createObjectURL(selected); byId('original').href = pdfUrl;
+  try {
+    const res = await fetch('/preview', {method:'POST', headers:{'Content-Type':'application/pdf'}, body:selected});
+    if (!res.ok) throw new Error();
+    const preview = await res.blob();
+    if (file.files[0] !== selected) return;
+    imageUrl = URL.createObjectURL(preview); pdf.src = imageUrl; pdf.hidden = false; byId('empty').hidden = true;
+  } catch { if (file.files[0] === selected) byId('empty').textContent = 'Podgląd niedostępny. Otwórz cały PDF.'; }
+};
+go.onclick = async () => {
+  const selected = file.files[0]; file.disabled = go.disabled = true; link.hidden = true;
+  result.textContent = ''; status.textContent = 'Analiza w toku…';
+  try {
+    const res = await fetch('/extract', {method:'POST', headers:{'Content-Type':'application/pdf'}, body:selected});
+    if (!res.ok) throw new Error(await res.text());
+    const text = await res.text(); result.textContent = text;
+    if (jsonUrl) URL.revokeObjectURL(jsonUrl);
+    jsonUrl = URL.createObjectURL(new Blob([text], {type:'application/json'}));
+    link.href = jsonUrl; link.download = selected.name.replace(/\.pdf$/i,'') + '.json'; link.hidden = false;
+    status.textContent = res.status === 204 ? 'Dokument poza obsługiwanymi klasami. Gotowy pusty plik JSON.' : 'Analiza zakończona.';
+  } catch(err) { status.textContent = 'Błąd analizy: ' + err.message; }
+  finally { file.disabled = go.disabled = false; }
+};
+</script></html>

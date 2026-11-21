@@ -1,0 +1,15 @@
+--- a/extractor.py
++++ b/extractor.py
+@@ -225,6 +225,12 @@
+         audit.update(route="partial_rules_after_api_error", api_error=type(error).__name__)
+     if kind == "odwolanie" and record:
+         record["OdwolanieKIO"]["czynnosc_opis"] = CODES.get(str(record["OdwolanieKIO"]["czynnosc_powod_id"]))
++    if ocr and kind in ("odwolanie", "pelnomocnictwo"):
++        entities = (record["Odwolujacy"] + record["Zamawiajacy"] if kind == "odwolanie" else
++                    [owner["data"] for owner in record["mocodawca"]])
++        for entity in entities:
++            if name := entity.get("nazwa"):
++                entity["nazwa"] = re.sub(r"\b(sp\.)\s+z\s+(?:0\.[o0]\.|o\.0\.)(?!\w)", r"\1 z o.o.", name, flags=re.I)
+     if not record and mode == "rules":
+         raise ValueError(f"No field rules for {kind}. Use the model for this document class.")
+     Draft202012Validator(schema).validate(record)

@@ -1,0 +1,788 @@
+{
+  "submission": {
+    "organizer_commit": "de135d20811caf630f3e94dc655ba5eebd9a6710",
+    "model": "Qwen3-4B-Instruct-2507 Q4_K_M, llama.cpp b12603 CPU",
+    "cause_6": "Odpowiedzi/wyjaśnienia do SWZ",
+    "metric": "Exact typed non-null leaf micro-F1 including list indices",
+    "positive_pooled": {
+      "documents": 180,
+      "correct_type": 180,
+      "exact": 175,
+      "tp": 2027,
+      "fp": 5,
+      "fn": 5,
+      "f1": 0.997539
+    },
+    "only_positive_discrepancy": {
+      "field": "OdwolanieKIO.czynnosc_opis",
+      "cases": [
+        "przyklad_19",
+        "przyklad_23",
+        "przyklad_25",
+        "przyklad_44",
+        "przyklad_55"
+      ]
+    },
+    "negatives_first_pass": {
+      "split": "negatives",
+      "mode": "hybrid",
+      "batch_exit": 0,
+      "documents": 16,
+      "zero_byte_files": 14,
+      "wrong_or_missing": 2
+    },
+    "distinct_negative_sha256_count": 11,
+    "source_pdf_counts": {
+      "positive": 180,
+      "negative_paths": 16
+    },
+    "runs": {
+      "dev": {
+        "split": "dev",
+        "cases": 48,
+        "mode": "hybrid",
+        "batch_exit": 0,
+        "elapsed_seconds": 261.83,
+        "results": {
+          "odwolanie": {
+            "documents": 48,
+            "correct_type": 48,
+            "exact": 45,
+            "tp": 965,
+            "fp": 3,
+            "fn": 3,
+            "f1": 0.996901
+          },
+          "pelnomocnictwo": {
+            "documents": 48,
+            "correct_type": 48,
+            "exact": 48,
+            "tp": 363,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1.0
+          },
+          "przelew": {
+            "documents": 48,
+            "correct_type": 48,
+            "exact": 48,
+            "tp": 288,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1.0
+          },
+          "ALL": {
+            "documents": 144,
+            "correct_type": 144,
+            "exact": 141,
+            "tp": 1616,
+            "fp": 3,
+            "fn": 3,
+            "f1": 0.998147
+          }
+        }
+      },
+      "holdout": {
+        "split": "holdout",
+        "cases": 12,
+        "mode": "hybrid",
+        "batch_exit": 0,
+        "elapsed_seconds": 91.17,
+        "results": {
+          "odwolanie": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 10,
+            "tp": 244,
+            "fp": 2,
+            "fn": 2,
+            "f1": 0.99187
+          },
+          "pelnomocnictwo": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 12,
+            "tp": 95,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1.0
+          },
+          "przelew": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 12,
+            "tp": 72,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1.0
+          },
+          "ALL": {
+            "documents": 36,
+            "correct_type": 36,
+            "exact": 34,
+            "tp": 411,
+            "fp": 2,
+            "fn": 2,
+            "f1": 0.995157
+          }
+        }
+      },
+      "negatives": {
+        "split": "negatives",
+        "mode": "hybrid",
+        "batch_exit": 0,
+        "documents": 16,
+        "zero_byte_files": 16,
+        "wrong_or_missing": 0
+      }
+    }
+  },
+  "earlier_reference_spelling": {
+    "organizer_commit": "8d0ef96245ad6dc3255767adf537fe8b86ed86f9",
+    "cause_6": "Odpowiedzi i wyjaśnienia do SWZ",
+    "runs": {
+      "dev-hybrid": {
+        "split": "dev",
+        "cases": 48,
+        "mode": "hybrid",
+        "batch_exit": 0,
+        "elapsed_seconds": 84.72,
+        "results": {
+          "odwolanie": {
+            "documents": 48,
+            "correct_type": 48,
+            "exact": 48,
+            "tp": 968,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          },
+          "pelnomocnictwo": {
+            "documents": 48,
+            "correct_type": 48,
+            "exact": 48,
+            "tp": 363,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          },
+          "przelew": {
+            "documents": 48,
+            "correct_type": 48,
+            "exact": 48,
+            "tp": 288,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          },
+          "ALL": {
+            "documents": 144,
+            "correct_type": 144,
+            "exact": 144,
+            "tp": 1619,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          }
+        }
+      },
+      "holdout-hybrid": {
+        "split": "holdout",
+        "cases": 12,
+        "mode": "hybrid",
+        "batch_exit": 0,
+        "elapsed_seconds": 28.3,
+        "results": {
+          "odwolanie": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 12,
+            "tp": 246,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          },
+          "pelnomocnictwo": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 12,
+            "tp": 95,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          },
+          "przelew": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 12,
+            "tp": 72,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          },
+          "ALL": {
+            "documents": 36,
+            "correct_type": 36,
+            "exact": 36,
+            "tp": 413,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          }
+        }
+      },
+      "dev-rules": {
+        "split": "dev",
+        "cases": 48,
+        "mode": "rules",
+        "batch_exit": 0,
+        "elapsed_seconds": 2.18,
+        "results": {
+          "odwolanie": {
+            "documents": 48,
+            "correct_type": 48,
+            "exact": 48,
+            "tp": 968,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          },
+          "pelnomocnictwo": {
+            "documents": 48,
+            "correct_type": 48,
+            "exact": 48,
+            "tp": 363,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          },
+          "przelew": {
+            "documents": 48,
+            "correct_type": 48,
+            "exact": 48,
+            "tp": 288,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          },
+          "ALL": {
+            "documents": 144,
+            "correct_type": 144,
+            "exact": 144,
+            "tp": 1619,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          }
+        }
+      },
+      "holdout-rules": {
+        "split": "holdout",
+        "cases": 12,
+        "mode": "rules",
+        "batch_exit": 0,
+        "elapsed_seconds": 0.65,
+        "results": {
+          "odwolanie": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 12,
+            "tp": 246,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          },
+          "pelnomocnictwo": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 12,
+            "tp": 95,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          },
+          "przelew": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 12,
+            "tp": 72,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          },
+          "ALL": {
+            "documents": 36,
+            "correct_type": 36,
+            "exact": 36,
+            "tp": 413,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          }
+        }
+      },
+      "initial-holdout-hybrid-replay": {
+        "split": "holdout",
+        "cases": 12,
+        "mode": "hybrid",
+        "batch_exit": 0,
+        "elapsed_seconds": 53.07,
+        "results": {
+          "odwolanie": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 11,
+            "tp": 243,
+            "fp": 3,
+            "fn": 3,
+            "f1": 0.987805
+          },
+          "pelnomocnictwo": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 12,
+            "tp": 95,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          },
+          "przelew": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 12,
+            "tp": 72,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          },
+          "ALL": {
+            "documents": 36,
+            "correct_type": 36,
+            "exact": 35,
+            "tp": 410,
+            "fp": 3,
+            "fn": 3,
+            "f1": 0.992736
+          }
+        }
+      },
+      "initial-holdout-rules-replay": {
+        "split": "holdout",
+        "cases": 12,
+        "mode": "rules",
+        "batch_exit": 0,
+        "elapsed_seconds": 0.48,
+        "results": {
+          "odwolanie": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 11,
+            "tp": 243,
+            "fp": 3,
+            "fn": 3,
+            "f1": 0.987805
+          },
+          "pelnomocnictwo": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 12,
+            "tp": 95,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          },
+          "przelew": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 12,
+            "tp": 72,
+            "fp": 0,
+            "fn": 0,
+            "f1": 1
+          },
+          "ALL": {
+            "documents": 36,
+            "correct_type": 36,
+            "exact": 35,
+            "tp": 410,
+            "fp": 3,
+            "fn": 3,
+            "f1": 0.992736
+          }
+        }
+      },
+      "holdout-full-api": {
+        "split": "holdout",
+        "cases": 12,
+        "mode": "llm",
+        "batch_exit": 0,
+        "results": {
+          "odwolanie": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 0,
+            "tp": 212,
+            "fp": 93,
+            "fn": 34,
+            "f1": 0.76951
+          },
+          "pelnomocnictwo": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 7,
+            "tp": 85,
+            "fp": 10,
+            "fn": 10,
+            "f1": 0.894737
+          },
+          "przelew": {
+            "documents": 12,
+            "correct_type": 12,
+            "exact": 1,
+            "tp": 50,
+            "fp": 22,
+            "fn": 22,
+            "f1": 0.694444
+          },
+          "ALL": {
+            "documents": 36,
+            "correct_type": 36,
+            "exact": 8,
+            "tp": 347,
+            "fp": 125,
+            "fn": 66,
+            "f1": 0.784181
+          }
+        },
+        "resume": {
+          "already_completed": 21,
+          "total_predictions": 36,
+          "latest_segment_seconds": 2314.9
+        },
+        "execution_note": "All 36 predictions were generated. Completed records were retained between CPU server restarts. Inter-request caching was disabled for the final long documents and the client read timeout was raised to 600 seconds."
+      },
+      "scan-01-initial-hybrid": {
+        "odwolanie": {
+          "tp": 19,
+          "fp": 11,
+          "fn": 0,
+          "exact": 0,
+          "documents": 1,
+          "f1": 0.77551,
+          "pages": 2,
+          "ocr_pages": [
+            1,
+            2
+          ],
+          "route": "full_api"
+        },
+        "pelnomocnictwo": {
+          "tp": 7,
+          "fp": 2,
+          "fn": 0,
+          "exact": 0,
+          "documents": 1,
+          "f1": 0.875,
+          "pages": 1,
+          "ocr_pages": [
+            1
+          ],
+          "route": "full_api"
+        },
+        "przelew": {
+          "tp": 6,
+          "fp": 0,
+          "fn": 0,
+          "exact": 1,
+          "documents": 1,
+          "f1": 1,
+          "pages": 1,
+          "ocr_pages": [
+            1
+          ],
+          "route": "full_api"
+        },
+        "ALL": {
+          "tp": 32,
+          "fp": 13,
+          "fn": 0,
+          "exact": 1,
+          "documents": 3,
+          "f1": 0.831169
+        }
+      },
+      "scan-01-initial-rules": {
+        "odwolanie": {
+          "tp": 19,
+          "fp": 0,
+          "fn": 0,
+          "exact": 1,
+          "documents": 1,
+          "f1": 1,
+          "pages": 2,
+          "ocr_pages": [
+            1,
+            2
+          ],
+          "route": "rules"
+        },
+        "pelnomocnictwo": {
+          "tp": 6,
+          "fp": 1,
+          "fn": 1,
+          "exact": 0,
+          "documents": 1,
+          "f1": 0.857143,
+          "pages": 1,
+          "ocr_pages": [
+            1
+          ],
+          "route": "rules"
+        },
+        "przelew": {
+          "tp": 4,
+          "fp": 0,
+          "fn": 2,
+          "exact": 0,
+          "documents": 1,
+          "f1": 0.8,
+          "pages": 1,
+          "ocr_pages": [
+            1
+          ],
+          "route": "rules"
+        },
+        "ALL": {
+          "tp": 29,
+          "fp": 1,
+          "fn": 3,
+          "exact": 1,
+          "documents": 3,
+          "f1": 0.935484
+        }
+      },
+      "scan-01-final-hybrid": {
+        "odwolanie": {
+          "tp": 19,
+          "fp": 0,
+          "fn": 0,
+          "exact": 1,
+          "documents": 1,
+          "f1": 1,
+          "pages": 2,
+          "ocr_pages": [
+            1,
+            2
+          ],
+          "route": "rules"
+        },
+        "pelnomocnictwo": {
+          "tp": 7,
+          "fp": 0,
+          "fn": 0,
+          "exact": 1,
+          "documents": 1,
+          "f1": 1,
+          "pages": 1,
+          "ocr_pages": [
+            1
+          ],
+          "route": "rules"
+        },
+        "przelew": {
+          "tp": 6,
+          "fp": 0,
+          "fn": 0,
+          "exact": 1,
+          "documents": 1,
+          "f1": 1,
+          "pages": 1,
+          "ocr_pages": [
+            1
+          ],
+          "route": "full_api"
+        },
+        "ALL": {
+          "tp": 32,
+          "fp": 0,
+          "fn": 0,
+          "exact": 3,
+          "documents": 3,
+          "f1": 1
+        }
+      },
+      "scan-05-frozen-hybrid": {
+        "odwolanie": {
+          "tp": 20,
+          "fp": 1,
+          "fn": 1,
+          "exact": 0,
+          "documents": 1,
+          "f1": 0.952381,
+          "pages": 2,
+          "ocr_pages": [
+            1,
+            2
+          ],
+          "route": "rules"
+        },
+        "pelnomocnictwo": {
+          "tp": 5,
+          "fp": 1,
+          "fn": 1,
+          "exact": 0,
+          "documents": 1,
+          "f1": 0.833333,
+          "pages": 1,
+          "ocr_pages": [
+            1
+          ],
+          "route": "full_api"
+        },
+        "przelew": {
+          "tp": 6,
+          "fp": 0,
+          "fn": 0,
+          "exact": 1,
+          "documents": 1,
+          "f1": 1,
+          "pages": 1,
+          "ocr_pages": [
+            1
+          ],
+          "route": "rules"
+        },
+        "ALL": {
+          "tp": 31,
+          "fp": 2,
+          "fn": 2,
+          "exact": 1,
+          "documents": 3,
+          "f1": 0.939394
+        }
+      },
+      "scan-05-rules": {
+        "odwolanie": {
+          "tp": 20,
+          "fp": 1,
+          "fn": 1,
+          "exact": 0,
+          "documents": 1,
+          "f1": 0.952381,
+          "pages": 2,
+          "ocr_pages": [
+            1,
+            2
+          ],
+          "route": "rules"
+        },
+        "pelnomocnictwo": {
+          "tp": 4,
+          "fp": 1,
+          "fn": 2,
+          "exact": 0,
+          "documents": 1,
+          "f1": 0.727273,
+          "pages": 1,
+          "ocr_pages": [
+            1
+          ],
+          "route": "rules"
+        },
+        "przelew": {
+          "tp": 6,
+          "fp": 0,
+          "fn": 0,
+          "exact": 1,
+          "documents": 1,
+          "f1": 1,
+          "pages": 1,
+          "ocr_pages": [
+            1
+          ],
+          "route": "rules"
+        },
+        "ALL": {
+          "tp": 30,
+          "fp": 2,
+          "fn": 3,
+          "exact": 1,
+          "documents": 3,
+          "f1": 0.923077
+        }
+      },
+      "scan-05-final-hybrid": {
+        "odwolanie": {
+          "tp": 21,
+          "fp": 0,
+          "fn": 0,
+          "exact": 1,
+          "documents": 1,
+          "f1": 1,
+          "pages": 2,
+          "ocr_pages": [
+            1,
+            2
+          ],
+          "route": "rules"
+        },
+        "pelnomocnictwo": {
+          "tp": 6,
+          "fp": 0,
+          "fn": 0,
+          "exact": 1,
+          "documents": 1,
+          "f1": 1,
+          "pages": 1,
+          "ocr_pages": [
+            1
+          ],
+          "route": "full_api"
+        },
+        "przelew": {
+          "tp": 6,
+          "fp": 0,
+          "fn": 0,
+          "exact": 1,
+          "documents": 1,
+          "f1": 1,
+          "pages": 1,
+          "ocr_pages": [
+            1
+          ],
+          "route": "rules"
+        },
+        "ALL": {
+          "tp": 33,
+          "fp": 0,
+          "fn": 0,
+          "exact": 3,
+          "documents": 3,
+          "f1": 1
+        }
+      },
+      "template": [
+        {
+          "class": null,
+          "pages": 9,
+          "ocr_pages": [],
+          "route": "excluded"
+        },
+        {
+          "class": "odwolanie",
+          "pages": 7,
+          "ocr_pages": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "route": "full_api"
+        }
+      ]
+    }
+  }
+}

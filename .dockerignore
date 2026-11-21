@@ -1,0 +1,9 @@
+.git
+.venv
+.env
+models
+input
+output
+results
+**/__pycache__
+.mypy_cache

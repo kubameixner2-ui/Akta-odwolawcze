@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+.mypy_cache/
+.env
+*.gguf
+models/
+input/*
+!input/.gitkeep
+output/*
+!output/.gitkeep
+results/
+*.jsonl

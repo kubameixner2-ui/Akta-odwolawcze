@@ -1,0 +1,120 @@
+{
+  "label": "Pełnomocnictwo",
+  "headings": [
+    "pełnomocnictwo",
+    "pełnomocnictwo procesowe",
+    "pełnomocnictwo szczególne",
+    "pełnomocnictwo do reprezentowania"
+  ],
+  "instructions": "Zachowaj kolejność dokumentu. Każda firma konsorcjum jest osobnym mocodawcą. Dla przedsiębiorcy wpisanego do CEIDG zachowaj pełną firmę, osobno imię i nazwisko, typ osoba_fizyczna. Dla spółki typ osoba_prawna, imie_nazwisko=null. Każdego podpisującego przypisz tylko do jego mocodawcy. Odróżnij podpis w imieniu spółki od podpisu potwierdzającego przyjęcie pełnomocnictwa. W pelnomocnicy wymień wszystkie osoby umocowane, bez tytułu zawodowego. PESEL jako tekst tylko przy jawnej etykiecie PESEL, bez numerów wpisu na listę.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "mocodawca": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "imie_nazwisko": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "krs": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "nazwa": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "nip": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "typ": {
+                  "enum": [
+                    "osoba_prawna",
+                    "osoba_fizyczna",
+                    null
+                  ]
+                }
+              },
+              "required": [
+                "imie_nazwisko",
+                "krs",
+                "nazwa",
+                "nip",
+                "typ"
+              ],
+              "additionalProperties": false
+            },
+            "podpisujacy": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "imie_nazwisko": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "imie_nazwisko"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "data",
+            "podpisujacy"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "pelnomocnicy": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "imie_nazwisko": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "pesel": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "imie_nazwisko",
+            "pesel"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": [
+      "mocodawca",
+      "pelnomocnicy"
+    ],
+    "additionalProperties": false
+  }
+}

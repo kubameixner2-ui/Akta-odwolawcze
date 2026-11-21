@@ -1,0 +1,22 @@
+--- a/fields.py
++++ b/fields.py
+@@ -89,10 +89,16 @@
+ 
+ 
+ def first_action(pages: list[str]) -> tuple[str, str]:
+-    t = flat("\n".join(pages))
+-    action = take(rf"(Zamawiający w dniu {DATE}.{{0,480}}?)(?=\.(?:\s+[A-ZĄĆĘŁŃÓŚŹŻ]|$)|\s+Zarzut nr|\s+Strona |$)", t, 0)
++    without_footers = re.sub(r"(?im)^[ \t]*strona\s+\d+\s+z\s+\d+[ \t]*$", "", "\n".join(pages))
++    t = flat(without_footers)
+     first = take(r"(?:polegających na:\s*1[).]\s*|Zarzut nr 1\s*[–:-]\s*)(.{10,650}?)(?=\s+[2][).]\s|Zarzut nr 2|;|$)", t)
+-    return action or "", first or ""
++    events = list(re.finditer(rf"Zamawiający w dniu ({DATE}).{{0,480}}?(?=\.(?:\s+[A-ZĄĆĘŁŃÓŚŹŻ]|$)|\s+Zarzut nr|$)", t))
++    dates = {iso(s) for s in re.findall(DATE, first or "", re.I)}
++    if len(dates) == 1:
++        for event in events:
++            if iso(event[1]) in dates:
++                return event[0], first or ""
++    return events[0][0] if events else "", first or ""
+ 
+ 
+ def appeal(pages: list[str], codes: dict[str, str]) -> Record:

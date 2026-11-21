@@ -1,0 +1,45 @@
+{
+  "split": "scans",
+  "scans": 30,
+  "mode": "hybrid",
+  "batch_exit": 0,
+  "elapsed_seconds": 271.75,
+  "results": {
+    "odwolanie": {
+      "documents": 10,
+      "correct_type": 10,
+      "exact": 4,
+      "tp": 171,
+      "fp": 8,
+      "fn": 6,
+      "f1": 0.960674
+    },
+    "pelnomocnictwo": {
+      "documents": 10,
+      "correct_type": 10,
+      "exact": 9,
+      "tp": 78,
+      "fp": 1,
+      "fn": 0,
+      "f1": 0.993631
+    },
+    "przelew": {
+      "documents": 10,
+      "correct_type": 10,
+      "exact": 5,
+      "tp": 50,
+      "fp": 5,
+      "fn": 4,
+      "f1": 0.917431
+    },
+    "ALL": {
+      "documents": 30,
+      "correct_type": 30,
+      "exact": 18,
+      "tp": 299,
+      "fp": 14,
+      "fn": 10,
+      "f1": 0.961415
+    }
+  }
+}

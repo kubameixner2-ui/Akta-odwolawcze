@@ -1,0 +1,236 @@
+{
+  "label": "Odwołanie do KIO",
+  "headings": [
+    "odwołanie",
+    "odwołanie do krajowej izby odwoławczej",
+    "odwołanie do prezesa krajowej izby odwoławczej",
+    "odwołanie od czynności zamawiającego"
+  ],
+  "instructions": "Data i miejscowość wyłącznie z datownika pierwszej strony. Warszawa z adresu KIO nie jest datownikiem. czynnosc_dzien dotyczy pierwszej zaskarżonej czynności. Przeczytaj opis zdarzenia przed zarzutem, punkt pierwszy oraz jego kontekst. Pomiń kolejne zarzuty, podstawy prawne i żądania. Przy konsorcjum zwróć jedynie lidera Odwołujących, ale wszystkich Zamawiających z osobna. Wykonawca wybrany nie jest Zamawiającym. Pierwszy pełnomocnik Odwołującego, bez tytułu, jego kancelaria i e-mail. Jeśli pojedynczy Zamawiający, prowadzacy_postepowanie=null. BZP bez spacji; TED NNNNNN-YYYY; identyfikatory jako tekst.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "OdwolanieKIO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "czynnosc_dzien": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "czynnosc_powod_id": {
+            "enum": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              null
+            ]
+          },
+          "czynnosc_opis": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "miejscowosc": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "czynnosc_dzien",
+          "czynnosc_powod_id",
+          "czynnosc_opis",
+          "miejscowosc"
+        ],
+        "additionalProperties": false
+      },
+      "Odwolujacy": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "krs": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "nazwa": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "nip": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "regon": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "przez-pelnomocnika": {
+              "enum": [
+                0,
+                1,
+                null
+              ]
+            },
+            "pelnomocnik": {
+              "type": "object",
+              "properties": {
+                "imie_nazwisko": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "nazwa": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "mail": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "imie_nazwisko",
+                "nazwa",
+                "mail"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "krs",
+            "nazwa",
+            "nip",
+            "regon",
+            "przez-pelnomocnika",
+            "pelnomocnik"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "Zamawiajacy": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "krs": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "nazwa": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "nip": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "regon": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "prowadzacy_postepowanie": {
+              "enum": [
+                0,
+                1,
+                null
+              ]
+            }
+          },
+          "required": [
+            "krs",
+            "nazwa",
+            "nip",
+            "regon",
+            "prowadzacy_postepowanie"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "ZamowieniePubliczne": {
+        "type": "object",
+        "properties": {
+          "numer_bzp": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "numer_postepowania": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "numer_ted": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tytul": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "numer_bzp",
+          "numer_postepowania",
+          "numer_ted",
+          "tytul"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "OdwolanieKIO",
+      "Odwolujacy",
+      "Zamawiajacy",
+      "ZamowieniePubliczne"
+    ],
+    "additionalProperties": false
+  }
+}

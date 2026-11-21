@@ -1,0 +1,11 @@
+services:
+  extractor:
+    build: .
+    environment:
+      - KIO_LLM_BASE_URL
+      - KIO_LLM_MODEL
+      - KIO_LLM_API_KEY
+    volumes:
+      - ./input:/app/input:ro
+      - ./output:/app/output
+      - ./config:/app/config:ro

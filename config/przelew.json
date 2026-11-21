@@ -1,0 +1,74 @@
+{
+  "label": "Potwierdzenie przelewu",
+  "headings": [
+    "polecenie przelewu",
+    "potwierdzenie transakcji",
+    "potwierdzenie realizacji polecenia przelewu",
+    "potwierdzenie wykonania przelewu",
+    "potwierdzenie przelewu krajowego",
+    "dowód wykonania przelewu",
+    "potwierdzenie operacji bankowej",
+    "potwierdzenie przelewu",
+    "potwierdzenie wykonanej operacji"
+  ],
+  "instructions": "Data operacji/przelewu w formacie YYYY-MM-DD. Odróżnij ją od wydruku. Kwota wykonanej operacji jako liczba, bez opłaty lub prowizji. Z rachunku oznacza nadawcę, na rachunek – beneficjenta. Przepisz rachunki bez spacji i prefiksu PL, zachowaj zera wiodące i oryginalne cyfry. Tytuł kopiuj w całości, także numer referencyjny, jeśli jest częścią tytułu.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "przelew_bankowy": {
+        "type": "object",
+        "properties": {
+          "data_operacji": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "kwota": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "na_rachunek": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "numer_transakcji": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tytul": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "z_rachunku": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "data_operacji",
+          "kwota",
+          "na_rachunek",
+          "numer_transakcji",
+          "tytul",
+          "z_rachunku"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "przelew_bankowy"
+    ],
+    "additionalProperties": false
+  }
+}
