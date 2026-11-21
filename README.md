@@ -1,216 +1,176 @@
-# KIO Appeals to JSON
+# ![PDF Parsoinator — Polish procurement case files to JSON](docs/assets/parsoinator.png)
 
-Convert case files from Poland’s National Appeals Chamber (KIO) into structured data. Give the CLI a folder of PDFs, or open one PDF in the browser to inspect its extracted fields beside the source. The extractor identifies each document by its contents and preserves the case folder structure.
+## Project structure
 
-[Run a sample case](#run-a-sample-case) · [Judging runbook](#judging-runbook) · [Benchmark results](#benchmark-results) · [Repository map](#repository-map)
+```text
+Akta-odwolawcze/
+├── input/                       # PDF case folders supplied at runtime
+│   └── .gitkeep
+├── output/                      # Mirrored JSON case folders
+│   └── .gitkeep
+├── config/                      # Document types and appeal cause dictionary
+│   ├── causes.json
+│   ├── odwolanie.json
+│   ├── pelnomocnictwo.json
+│   └── przelew.json
+├── scripts/                     # Reproducible public checks
+│   └── check_public.py
+├── docs/                        # Verification, experiment history and jury guide
+│   ├── assets/
+│   │   └── parsoinator.png
+│   ├── experiments.md
+│   ├── jury-pl.md
+│   └── verification.md
+├── benchmarks/                  # Measured results and historical experiment patches
+│   ├── first-claim.patch
+│   ├── ocr-company-suffix.patch
+│   ├── public-rerun.json
+│   ├── readiness.json
+│   ├── scaleway-scans-v2-live.json
+│   └── scaleway-scans-v3-replay.json
+├── tessdata/                    # Bundled OCR languages and their license
+│   ├── eng.traineddata
+│   ├── LICENSE
+│   └── pol.traineddata
+├── tests/                       # Regression tests
+│   ├── test_contract.py
+│   ├── test_fields.py
+│   ├── test_names.py
+│   ├── test_readiness.py
+│   └── test_scan_fields.py
+├── .dockerignore
+├── .env.example                 # Hosted settings template with a blank key
+├── .gitignore
+├── check_api.py                 # One-request API check
+├── compose.yaml
+├── Dockerfile
+├── evaluate.py                  # Public split evaluator and scan replay
+├── extractor.py                 # PDF reading, OCR, classification and routing
+├── fields.py                    # Field rules for native text
+├── index.html                   # Browser review interface
+├── LICENSE
+├── names.py                     # Polish name normalization
+├── README.md
+├── requirements-dev.txt
+├── requirements.txt
+├── run.py                       # Batch and local web entry point
+├── scan_fields.py               # Field corrections for scans
+└── start-local-model.sh         # Optional local model for development
+```
 
-## Run a sample case
+## Run your first case
 
-Process all three documents in the organizer’s first public case. The example needs Git and Python 3.13 and runs on the CPU without an API key. The files below appear in `results/demo/`. Their JSON keys follow the organizer’s Polish schemas. [Sample PDFs and reference JSONs][case]
+PDF Parsoinator reads a folder of Polish procurement case files and produces one result per PDF. It recognizes appeals to the National Appeals Chamber (KIO), powers of attorney and bank transfer confirmations. It preserves filenames and case folders. Scanned pages can be read locally using the bundled Polish and English OCR data.
 
-| Document | Output file | What you can verify in case 01 |
-| --- | --- | --- |
-| Procurement appeal | `odwolanie.json` | The challenged action is dated `2026-03-20` in procedure `ZS.791.2026`. |
-| Power of attorney | `pelnomocnictwo.json` | One grantor appoints two attorneys. |
-| Bank transfer confirmation | `przelew.json` | Transaction `CEN2604016344389` has an amount of `200.0`. |
+### 1. Install
 
-**Linux or WSL.** Run this block from a directory where you want the project cloned. If WSL uses `uv`, replace the environment creation line with `uv venv --python 3.13 --seed .venv`.
+Use Git and Python 3.13. Run the following from the folder where you keep projects. If you already have this checkout, start with the environment creation line **inside the repository**.
+
+**Linux or WSL**
 
 ```bash
 git clone https://github.com/kubameixner2-ui/Akta-odwolawcze.git
 cd Akta-odwolawcze
 python3.13 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-
-git clone --filter=blob:none --no-checkout https://github.com/Urzad-Zamowien-Publicznych/hacknation-2026.git results/uzp
-git -C results/uzp sparse-checkout set dane/przyklad_01
-git -C results/uzp checkout --detach 84cc976f0a9af5cee14f131c795f929134ca0fda
-python run.py --mode rules --input results/uzp/dane/przyklad_01 --output results/demo
+.venv/bin/python -m pip install -r requirements.txt
 ```
 
-<details>
-<summary><strong>Windows PowerShell</strong> · Run the same example</summary>
+If Ubuntu has no `python3.13` command and you have `uv`, use `uv venv --python 3.13 --seed .venv` for the environment creation line. All examples call the environment’s interpreter directly and also work in a new terminal opened at the repository root. [Installing uv](https://docs.astral.sh/uv/getting-started/installation/)
+
+**Windows PowerShell**
 
 ```powershell
 git clone https://github.com/kubameixner2-ui/Akta-odwolawcze.git
 cd Akta-odwolawcze
 py -3.13 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-
-git clone --filter=blob:none --no-checkout https://github.com/Urzad-Zamowien-Publicznych/hacknation-2026.git results/uzp
-git -C results/uzp sparse-checkout set dane/przyklad_01
-git -C results/uzp checkout --detach 84cc976f0a9af5cee14f131c795f929134ca0fda
-.\.venv\Scripts\python.exe run.py --mode rules --input results/uzp/dane/przyklad_01 --output results/demo
 ```
 
-Use `.\.venv\Scripts\python.exe` wherever the remaining examples use `python`.
+### 2. Run the example and open the results
 
-</details>
+The demo fetches eight public PDFs, invokes the same batch command used for judging, then checks the outputs against the organizer’s references. It runs on the CPU without an API key. Run the command for your platform.
 
-<details>
-<summary><strong>Inspect the JSON and verify all three records</strong></summary>
-
-This excerpt from `results/demo/przelew.json` shows why account numbers are strings. The payer’s account starts with a zero. The amount is a JSON number.
-
-```json
-{
-  "przelew_bankowy": {
-    "z_rachunku": "05470680287581539721455024",
-    "kwota": 200.0,
-    "data_operacji": "2026-03-21",
-    "numer_transakcji": "CEN2604016344389"
-  }
-}
-```
-
-With the sample-only checkout above, run the evaluator. It renames the PDFs before extraction and compares the resulting records with the official references.
-
-```sh
-python evaluate.py results/uzp/dane --split dev --mode rules --output results/demo-check
-```
-
-Under `results.ALL`, expect `documents: 3`, `exact: 3` and `f1: 1.0`.
-
-</details>
-
-## Judging runbook
-
-The target is an Intel i7 office laptop with 16 GB of RAM and no GPU. [Organizer’s specification][spec]
-
-1. Install the application as above. Place the team’s private `.env` beside `run.py`. It is loaded automatically.
-2. Put the judging PDFs in `input/`, grouped into case folders. Start with a fresh `output/` directory.
-3. From the repository root, check the hosted API and run the batch.
-
-```sh
-python check_api.py
-python run.py
-```
-
-The check prints `ok` after one live model request. The batch uses `hybrid` mode. PDF reading and OCR run locally on the CPU. When classification or field extraction needs the model, the client sends selected document text to Scaleway’s Paris service. [Provider region][scaleway] · [Model card][mistral]
-
-<details>
-<summary><strong>API settings used for the hosted run</strong></summary>
-
-```dotenv
-KIO_LLM_BASE_URL=https://api.scaleway.ai/v1
-KIO_LLM_MODEL=mistral/mistral-small-3.2-24b-instruct-2506:fp8
-KIO_LLM_API_KEY=YOUR_PRIVATE_TEAM_KEY
-```
-
-Replace the placeholder in your private `.env` with the team key. Existing environment variables take precedence.
-
-</details>
-
-**Output contract.** `input/case-07/attachment.pdf` produces `output/case-07/attachment.json`. A recognized PDF gets a schema-validated UTF-8 record. Missing nullable fields use `null`. An out-of-scope PDF gets a **zero-byte** `.json` file at the expected path. A file-processing error is reported on standard error and yields a nonzero batch exit code.
-
-| To do this | Run from the repository root |
+| Linux or WSL | Windows PowerShell |
 | --- | --- |
-| Review a PDF beside its JSON and download the result | `python run.py --ui`, then open `http://127.0.0.1:8765`. If the port is busy, add `--port 8766` and open that port. |
-| Record the extraction route, OCR pages and literal field matches | `python run.py --input input --output output --trace 2> output/trace.log` |
-| Process a folder entirely on the CPU with field rules | `python run.py --mode rules` |
-| Use the model for full extraction of each recognized PDF | `python run.py --mode llm` |
-| Run the judging batch in Docker | `docker compose run --rm --build extractor` |
+| `.venv/bin/python scripts/check_public.py demo` | `.\.venv\Scripts\python.exe scripts/check_public.py demo` |
 
-## Benchmark results
+The terminal prints a new folder under `results/demo-rules-*/`. Open its `output/` folder to inspect the JSONs and `report.json` to check the counts. Expect **8 outputs, 7 exact JSON records, 1 correct zero-byte file and `passed: true`**. Each invocation uses a fresh folder. If you already have the organizer’s pinned dataset, append `--data /path/to/dane` to skip the download. [Public fixtures][data]
 
-The live hosted run classified **30/30 scans** correctly in **271.75 seconds**. Eighteen records matched their references in full. These public scans informed development. The competition uses a separate hidden set. [Live score report][live] · [Public evaluation data][data]
+| Case folder | PDF inside `input/<case>/` | Result inside `output/<case>/` | Expected content |
+| --- | --- | --- | --- |
+| `case1` | `odwolanie_nr_1.pdf` | `odwolanie_nr_1.json` | Appeal for procedure `ZS.791.2026` |
+| `case1` | `pelnomocnictwo_nr_1.pdf` | `pelnomocnictwo_nr_1.json` | First power of attorney |
+| `case1` | `pelnomocnictwo_nr_2.pdf` | `pelnomocnictwo_nr_2.json` | Second, distinct power of attorney |
+| `case1` | `przelew_nr_1.pdf` | `przelew_nr_1.json` | Transfer `CEN2604016344389`, amount `200.0` |
+| `case2` | `odwolanie_nr_2.pdf` | `odwolanie_nr_2.json` | Appeal |
+| `case2` | `pelnomocnictwo_nr_3.pdf` | `pelnomocnictwo_nr_3.json` | Power of attorney |
+| `case2` | `przelew_nr_2.pdf` | `przelew_nr_2.json` | Bank transfer |
+| `case3` | `attachment.pdf` | `attachment.json` | Excluded notice, exactly 0 bytes |
 
-| Public inputs | Extraction method | Exact outputs | Field micro-F1 |
-| --- | --- | ---: | ---: |
-| 30 scanned PDFs | Fresh hosted hybrid run | 18/30 | **96.14%** |
-| The same 30 scans | Offline replay of saved predictions with updated OCR corrections | 21/30 | **97.25%** |
-| 180 native-text PDFs | Rules only | 180/180 | **100.00%** |
-| 16 out-of-scope PDFs | Rules only | 16/16 zero-byte files | — |
+These are generated demonstration files. The repository ships empty `input/` and `output/` folders for the judge’s own cases. The demo assembles its layout from public cases 01–04, including the extra power of attorney from case 03. [Organizer’s filename example][layout]
 
-Field micro-F1 pools matching non-null values across documents using their JSON paths, types and list positions. A single wrong digit can lose a whole-document match. Replay rereads the PDFs and applies corrections to saved per-document JSON files with zero new model calls. The public live report includes the counts for each class. [Evaluator](evaluate.py)
+### 3. Run a judging batch
 
-<details>
-<summary><strong>Reproduce the public evaluations</strong></summary>
+1. Place the team’s privately supplied `.env` beside `run.py`. For a new team setup, copy `.env.example` to `.env` and fill in the value of `KIO_LLM_API_KEY` locally. The template includes the hosted URL and model ID. The program loads the file itself. Supply the key to the judges privately.
+2. Place PDFs in `input/`, using the case folders you want to preserve. Use an empty output folder for each new assessment. For another location, pass `--input PATH --output PATH`.
+3. Run the API check, then the batch. The check prints `ok` after one schema-constrained model request.
 
-Expand the pinned sample checkout to the full dataset. The two native-text splits cover 48 and 12 cases, respectively, with three supported documents per case. Each command prints a report and writes predictions to its own directory.
+| Action | Linux or WSL | Windows PowerShell |
+| --- | --- | --- |
+| Verify the configured API | `.venv/bin/python check_api.py` | `.\.venv\Scripts\python.exe check_api.py` |
+| Process `input/` into `output/` | `.venv/bin/python run.py` | `.\.venv\Scripts\python.exe run.py` |
+| Time the public 150-PDF fixture with the judging configuration | `.venv/bin/python scripts/check_public.py timing --mode hybrid` | `.\.venv\Scripts\python.exe scripts/check_public.py timing --mode hybrid` |
 
-```sh
-git -C results/uzp sparse-checkout set dane
-python evaluate.py results/uzp/dane --split dev --mode rules --output results/native-dev
-python evaluate.py results/uzp/dane --split holdout --mode rules --output results/native-holdout
-python evaluate.py results/uzp/dane --split negatives --mode rules --output results/exclusions
-```
+The default mode is `hybrid`. It reads the PDF on the CPU and uses rules for recognized fields. When it needs model assistance it sends extracted text to the configured API. `--mode rules` runs entirely on the CPU without an API key. `--mode llm` requests model extraction for each document classified as supported. Use `--trace` for the extraction route, OCR page numbers and page references for literal matches on standard error. [Extraction and routing](extractor.py)
 
-For scans, run hosted inference first to create 30 prediction files. The second command replays your saved predictions. Reproducing the historical 97.25% exactly requires the predictions from that historical run.
+Output JSON uses the official Polish field names. A missing value is `null` where the schema permits it. An excluded PDF gets a zero-byte `.json` at the corresponding path. Batch errors name the affected file on standard error and return a nonzero exit code. UZP requires **150 PDFs within 45 minutes**, CPU-capable execution, and an API with EU/EEA processing for hosted inference. [Current judging specification][spec] · [45-minute limit][time] · [Scaleway deployment region][provider] · [Model card][model]
 
-```sh
-python evaluate.py results/uzp/dane --split scans --mode hybrid --output results/scans-live
-python evaluate.py results/uzp/dane --split scans --replay-from results/scans-live --output results/scans-replay
-```
+### 4. Review a PDF in the browser
 
-</details>
-
-## Repository map
-
-| Responsibility | Where to look |
+| Linux or WSL | Windows PowerShell |
 | --- | --- |
-| Batch CLI, local HTTP server and browser review | [run.py](run.py) · [index.html](index.html) |
-| PDF reading, OCR, classification and model routing | [extractor.py](extractor.py) · [OCR language data](tessdata/) · [API check](check_api.py) |
-| Field rules, name normalization and scan corrections | [fields.py](fields.py) · [names.py](names.py) · [scan_fields.py](scan_fields.py) |
-| Document schemas, headings and extraction instructions | [Appeals](config/odwolanie.json) · [Powers of attorney](config/pelnomocnictwo.json) · [Transfers](config/przelew.json) · [Appeal reason codes](config/causes.json) |
-| Evaluation and regression tests | [evaluate.py](evaluate.py) · [tests/](tests/) · [Benchmark reports](benchmarks/) |
-| Container and optional local inference setup | [Compose](compose.yaml) · [Dockerfile](Dockerfile) · [Local model launcher](start-local-model.sh) |
+| `.venv/bin/python run.py --ui --mode rules` | `.\.venv\Scripts\python.exe run.py --ui --mode rules` |
 
-<details>
-<summary><strong>How hybrid mode processes a PDF</strong></summary>
+Open the address printed by the server. Choose a PDF, run the analysis, then inspect the first-page preview beside its JSON and use the download link. The browser saves the result to its download location. Omit `--mode rules` to use the configured hybrid extractor. If the default port is busy the server prints a free port. Stop it with **Ctrl+C**.
 
-```mermaid
-flowchart TD
-    read["Read page text or run local OCR"] --> kind{"Supported document type?"}
-    kind -->|No| empty["Write zero-byte file"]
-    kind -->|Yes| rules{"Can the rules resolve the fields?"}
-    rules -->|Yes| validate["Normalize and validate"]
-    rules -->|Needs a model| api["Request a structured model response"]
-    api --> validate
-    validate --> write["Write JSON"]
-```
+## Measured results
 
-The classifier checks the document’s own headings and content. Ambiguous cases can go to the model. For an appeal, hybrid mode can ask a focused question about the first challenged action. A document with unresolved fields can go through full schema-constrained extraction.
+The public training directory has **226 PDF paths** across three groups. The native and scan rows measure field extraction. Exclusions are scored by checking that the output file exists and contains zero bytes. The live and replay rows use the **same 30 scans**. [Public dataset][data] · [Measurement record](benchmarks/readiness.json)
 
-</details>
+| Public inputs and method | PDFs | True positives | False positives | False negatives | Precision | Recall | Field micro-F1 | Exact documents |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Native text · CPU rules | 180 | 2,032 | 0 | 0 | 100.00% | 100.00% | **100.00%** | 180/180 |
+| Scans · CPU rules | 30 | 132 | 24 | 177 | 84.62% | 42.72% | **56.77%** | 0/30 |
+| Scans · hosted hybrid, live v2 | 30 | 299 | 14 | 10 | 95.53% | 96.76% | **96.14%** | 18/30 |
+| Scans · offline replay of v2, updated corrections | 30 | 301 | 9 | 8 | 97.10% | 97.41% | **97.25%** | 21/30 |
+| Excluded documents · CPU rules | 16 | — | — | — | — | — | — | 16/16 empty |
 
-<details>
-<summary><strong>Add a document type or field</strong></summary>
+On the 30 scans, bank transfers had the lowest live F1 at **91.74%**. After replay, three transfer titles still differed from the references. Those three values account for **6 of the 17** remaining false positives and false negatives. Replaying corrects saved predictions using the PDF and OCR. A fresh API run can produce different values. The organizer scores a separate, undisclosed test set. [Per-class scores, field errors and method](docs/verification.md#where-the-scan-errors-are) · [Official testing procedure][spec]
 
-For example, save this definition as `config/invoice.json` and restart in `hybrid` or `llm` mode. A PDF headed “Invoice” can then return an `invoice_number` field.
+| Timed batch · CPU rules | Measured | Interpretation |
+| --- | ---: | --- |
+| 104 native PDFs + 30 scans + 16 exclusions | 150 paths | 145 distinct PDF contents |
+| Wall time | **325.17 s** | 5 min 25.17 s for the batch CLI. The limit is 2,700 s. |
+| Mean processing time | **2.17 s/PDF** | The limit allows 18 s/PDF on average. |
+| Output files at expected paths | **150/150** | All 124 nonempty files contained schema-valid JSON. |
+| Correct disposition | **140/150** | 10 supported scans were incorrectly empty. All 16 exclusions were correctly empty. |
+| Exact documents, including exclusions | **120/150** | 104 native, 0 scanned and 16 excluded documents matched. |
 
-```json
-{
-  "label": "Invoice",
-  "headings": ["Invoice"],
-  "instructions": "Copy the invoice number exactly. Use null when it is missing.",
-  "schema": {
-    "type": "object",
-    "properties": {"invoice_number": {"type": ["string", "null"]}},
-    "required": ["invoice_number"],
-    "additionalProperties": false
-  }
-}
-```
+The timing establishes CPU throughput for this public mix. The full 150-file **hosted hybrid** timing still needs a run with the team API on the judging setup. The organizer has placed the hardware specification under review. [Reproduce the timed run](docs/verification.md#run-the-150-pdf-check) · [Organizer’s timing rule][time]
 
-To add a field to an existing type, update its schema and instructions. The contract tests exercise both changes. [Transfer configuration](config/przelew.json) · [Extension tests](tests/test_contract.py)
+## Operate and extend
 
-</details>
+| Task | Where to go |
+| --- | --- |
+| Reproduce all public splits, replay saved predictions or diagnose startup | [Verification runbook](docs/verification.md) |
+| Add a class or field | Add a file in `config/` with `label`, `headings`, `instructions` and a JSON `schema`, or edit an existing one. Restart and use hybrid or LLM mode. [Transfer example](config/przelew.json) · [Extension tests](tests/test_contract.py) |
+| Run the default batch in Docker | Put the private `.env` and `input/` in place, then run `docker compose run --rm --build extractor`. [Compose definition](compose.yaml) |
+| Review earlier model comparisons or read the jury guide in Polish | [Earlier experiments](docs/experiments.md) · [Polish jury guide](docs/jury-pl.md) |
+| Check redistribution terms | [Application license](LICENSE) · [Bundled OCR data license](tessdata/LICENSE) |
 
-### Development checks
-
-```sh
-python -m pip install -r requirements-dev.txt
-python -m mypy --check-untyped-defs run.py check_api.py evaluate.py tests
-python -m unittest discover -s tests -v
-```
-
-[Application license (AGPL-3.0)](LICENSE) · [OCR data license (Apache-2.0)](tessdata/LICENSE) · [Earlier experiments](BENCHMARK.md) · [Polish jury guide](DLA_JURY.md)
-
-[case]: https://github.com/Urzad-Zamowien-Publicznych/hacknation-2026/tree/84cc976f0a9af5cee14f131c795f929134ca0fda/dane/przyklad_01
 [data]: https://github.com/Urzad-Zamowien-Publicznych/hacknation-2026/tree/84cc976f0a9af5cee14f131c795f929134ca0fda/dane
-[spec]: https://github.com/Urzad-Zamowien-Publicznych/hacknation-2026/blob/84cc976f0a9af5cee14f131c795f929134ca0fda/README.md
-[live]: benchmarks/scaleway-scans-v2-live.json
-[scaleway]: https://www.scaleway.com/en/docs/generative-apis/faq/
-[mistral]: https://huggingface.co/mistralai/Mistral-Small-3.2-24B-Instruct-2506
+[layout]: https://github.com/Urzad-Zamowien-Publicznych/hacknation-2026/blob/0b360a9da4b482a6a280696df6714404e0953505/README.md#L66-L101
+[spec]: https://github.com/Urzad-Zamowien-Publicznych/hacknation-2026/blob/0b360a9da4b482a6a280696df6714404e0953505/README.md#L119-L184
+[time]: https://github.com/Urzad-Zamowien-Publicznych/hacknation-2026/blob/0b360a9da4b482a6a280696df6714404e0953505/README.md#L186-L192
+[provider]: https://www.scaleway.com/en/docs/generative-apis/faq/
+[model]: https://huggingface.co/mistralai/Mistral-Small-3.2-24B-Instruct-2506

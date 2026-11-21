@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import errno
 import json
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -20,8 +21,12 @@ FAILURES = (ValueError, RuntimeError, OSError, KeyError, IndexError, ValidationE
 def batch(source: Path, target: Path, mode: str, trace: bool = False) -> int:
     if not source.is_dir():
         raise FileNotFoundError(f"Input directory does not exist: {source}")
+    pdfs = sorted(p for p in source.rglob("*") if p.is_file() and p.suffix.lower() == ".pdf")
+    if not pdfs:
+        print(f"No PDF files found in {source}. Add a PDF there or select a directory with --input.", file=sys.stderr)
+        return 0
     errors = 0
-    for pdf in sorted(p for p in source.rglob("*") if p.is_file() and p.suffix.lower() == ".pdf"):
+    for pdf in pdfs:
         relative = pdf.relative_to(source)
         dest = target / relative.with_suffix(".json")
         try:
@@ -43,7 +48,7 @@ def batch(source: Path, target: Path, mode: str, trace: bool = False) -> int:
     return int(errors > 0)
 
 
-def serve(mode: str, port: int) -> None:
+def serve(mode: str, port: int | None) -> None:
     class Handler(BaseHTTPRequestHandler):
         def send_body(self, status: int, body: bytes, mime: str) -> None:
             self.send_response(status)
@@ -86,20 +91,33 @@ def serve(mode: str, port: int) -> None:
                 self.send_body(422, str(err).encode(), "text/plain; charset=utf-8")
             except FAILURES as err:
                 self.send_body(500, str(err).encode(), "text/plain; charset=utf-8")
-    print(f"http://127.0.0.1:{port}", flush=True)
-    ThreadingHTTPServer(("127.0.0.1", port), Handler).serve_forever()
+    try:
+        server = ThreadingHTTPServer(("127.0.0.1", 8765 if port is None else port), Handler)
+    except OSError as err:
+        if err.errno != errno.EADDRINUSE:
+            raise
+        if port is not None:
+            raise SystemExit(f"Port {port} is already in use. Run again without --port to choose a free port.") from None
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    with server:
+        print(f"http://127.0.0.1:{server.server_port}", flush=True)
+        server.serve_forever()
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="KIO | Ekstrakcja dokumentów do JSON")
-    parser.add_argument("--input", type=Path, default=Path("input"))
-    parser.add_argument("--output", type=Path, default=Path("output"))
-    parser.add_argument("--mode", choices=["hybrid", "rules", "llm"], default="hybrid")
+    parser = argparse.ArgumentParser(description="Extract Polish KIO case PDFs to a mirrored tree of JSON files.")
+    parser.add_argument("--input", type=Path, default=Path("input"), help="PDF case directory (default: input)")
+    parser.add_argument("--output", type=Path, default=Path("output"), help="JSON result directory (default: output)")
+    parser.add_argument("--mode", choices=["hybrid", "rules", "llm"], default="hybrid",
+                        help="Rules and configured API (hybrid, default), rules only, or model extraction")
     parser.add_argument("--trace", action="store_true", help="Include page references on stderr")
     parser.add_argument("--ui", action="store_true", help="Start the local PDF review service")
-    parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--port", type=int, help="UI port (default: 8765, or a free port if busy)")
     args = parser.parse_args()
     if args.ui:
         serve(args.mode, args.port)
     else:
-        sys.exit(batch(args.input, args.output, args.mode, args.trace))
+        try:
+            sys.exit(batch(args.input, args.output, args.mode, args.trace))
+        except FileNotFoundError as err:
+            sys.exit(str(err))

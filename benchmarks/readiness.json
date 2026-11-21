@@ -1,0 +1,359 @@
+{
+  "measured_on": "2026-11-21",
+  "baseline_solution_commit": "3518920f02319278ce9a5305c95afc8abf9b31a0",
+  "organizer_spec_commit": "0b360a9da4b482a6a280696df6714404e0953505",
+  "fixture_commit": "84cc976f0a9af5cee14f131c795f929134ca0fda",
+  "fixture_dane_git_tree": "1c3f31a93ac3ff01d21135977c3a3950e7d28bb3",
+  "audit_host": {
+    "python": "3.13.18",
+    "system": "Linux",
+    "architecture": "x86_64"
+  },
+  "source_comparison": {
+    "entries": 3060,
+    "files": 2657,
+    "tracked_files_matching": 36,
+    "private_env_files_by_name": 2,
+    "original_banner_sha256": "df420ec2ec1cf39bf9dd96bc362a95f4c4d349ed0f334631ab62b30eef491806"
+  },
+  "public_data": {
+    "pdf_paths": 226,
+    "distinct_pdf_contents": 221,
+    "native": 180,
+    "scans": 30,
+    "exclusion_paths": 16,
+    "distinct_exclusion_contents": 11
+  },
+  "demo_rules": {
+    "profile": "demo",
+    "mode": "rules",
+    "expected_fixture_revision": "84cc976f0a9af5cee14f131c795f929134ca0fda",
+    "pdfs": 8,
+    "distinct_source_paths": 8,
+    "distinct_pdf_contents": 8,
+    "zero_byte_outputs": 1,
+    "correct_zero_byte": 1,
+    "empty_in_scope": 0,
+    "nonempty_exclusions": 0,
+    "invalid_paths": 0,
+    "invalid_utf8": 0,
+    "invalid_json": 0,
+    "invalid_schema": 0,
+    "exact_in_scope": 7,
+    "outputs": 8,
+    "missing": 0,
+    "unexpected": 0,
+    "in_scope": 7,
+    "expected_exclusions": 1,
+    "exact_outputs": 8,
+    "output_contract_ok": true,
+    "batch_exit": 0,
+    "wall_seconds": 0.461,
+    "seconds_per_pdf": 0.058,
+    "time_limit_seconds": null,
+    "within_time_limit": null,
+    "passed": true,
+    "wrong_class_in_scope": 0,
+    "output_format_ok": true,
+    "disposition_ok": true
+  },
+  "timing_rules": {
+    "profile": "timing",
+    "mode": "rules",
+    "expected_fixture_revision": "84cc976f0a9af5cee14f131c795f929134ca0fda",
+    "pdfs": 150,
+    "distinct_source_paths": 150,
+    "distinct_pdf_contents": 145,
+    "zero_byte_outputs": 26,
+    "correct_zero_byte": 16,
+    "empty_in_scope": 10,
+    "nonempty_exclusions": 0,
+    "invalid_paths": 0,
+    "invalid_utf8": 0,
+    "invalid_json": 0,
+    "invalid_schema": 0,
+    "exact_in_scope": 104,
+    "outputs": 150,
+    "missing": 0,
+    "unexpected": 0,
+    "in_scope": 134,
+    "expected_exclusions": 16,
+    "exact_outputs": 120,
+    "output_contract_ok": false,
+    "batch_exit": 0,
+    "wall_seconds": 325.17,
+    "seconds_per_pdf": 2.168,
+    "time_limit_seconds": 2700,
+    "within_time_limit": true,
+    "passed": false,
+    "wrong_class_in_scope": 0,
+    "output_format_ok": true,
+    "disposition_ok": false
+  },
+  "timing_exact_by_group": {
+    "native": {
+      "pdfs": 104,
+      "exact": 104,
+      "empty": 0
+    },
+    "scans": {
+      "pdfs": 30,
+      "exact": 0,
+      "empty": 10
+    },
+    "exclusions": {
+      "pdfs": 16,
+      "exact": 16,
+      "empty": 16
+    }
+  },
+  "timing_scan_fields_rules": {
+    "tp": 132,
+    "fp": 24,
+    "fn": 177,
+    "f1": 0.567742
+  },
+  "native_rules": {
+    "dev": {
+      "split": "dev",
+      "cases": 48,
+      "mode": "rules",
+      "batch_exit": 0,
+      "elapsed_seconds": 3.78,
+      "results": {
+        "odwolanie": {
+          "documents": 48,
+          "correct_type": 48,
+          "exact": 48,
+          "tp": 968,
+          "fp": 0,
+          "fn": 0,
+          "f1": 1.0
+        },
+        "pelnomocnictwo": {
+          "documents": 48,
+          "correct_type": 48,
+          "exact": 48,
+          "tp": 363,
+          "fp": 0,
+          "fn": 0,
+          "f1": 1.0
+        },
+        "przelew": {
+          "documents": 48,
+          "correct_type": 48,
+          "exact": 48,
+          "tp": 288,
+          "fp": 0,
+          "fn": 0,
+          "f1": 1.0
+        },
+        "ALL": {
+          "documents": 144,
+          "correct_type": 144,
+          "exact": 144,
+          "tp": 1619,
+          "fp": 0,
+          "fn": 0,
+          "f1": 1.0
+        }
+      }
+    },
+    "holdout": {
+      "split": "holdout",
+      "cases": 12,
+      "mode": "rules",
+      "batch_exit": 0,
+      "elapsed_seconds": 0.4,
+      "results": {
+        "odwolanie": {
+          "documents": 12,
+          "correct_type": 12,
+          "exact": 12,
+          "tp": 246,
+          "fp": 0,
+          "fn": 0,
+          "f1": 1.0
+        },
+        "pelnomocnictwo": {
+          "documents": 12,
+          "correct_type": 12,
+          "exact": 12,
+          "tp": 95,
+          "fp": 0,
+          "fn": 0,
+          "f1": 1.0
+        },
+        "przelew": {
+          "documents": 12,
+          "correct_type": 12,
+          "exact": 12,
+          "tp": 72,
+          "fp": 0,
+          "fn": 0,
+          "f1": 1.0
+        },
+        "ALL": {
+          "documents": 36,
+          "correct_type": 36,
+          "exact": 36,
+          "tp": 413,
+          "fp": 0,
+          "fn": 0,
+          "f1": 1.0
+        }
+      }
+    }
+  },
+  "exclusions_rules": {
+    "split": "negatives",
+    "mode": "rules",
+    "batch_exit": 0,
+    "documents": 16,
+    "zero_byte_files": 16,
+    "wrong_or_missing": 0
+  },
+  "scan_inputs": {
+    "supported": 30,
+    "live_and_replay_use_same_documents": true
+  },
+  "reproduced_replay_using_saved_live_predictions": {
+    "split": "scans",
+    "scans": 30,
+    "mode": "replay",
+    "batch_exit": 0,
+    "elapsed_seconds": 306.3,
+    "results": {
+      "odwolanie": {
+        "documents": 10,
+        "correct_type": 10,
+        "exact": 5,
+        "tp": 172,
+        "fp": 5,
+        "fn": 5,
+        "f1": 0.971751
+      },
+      "pelnomocnictwo": {
+        "documents": 10,
+        "correct_type": 10,
+        "exact": 9,
+        "tp": 78,
+        "fp": 1,
+        "fn": 0,
+        "f1": 0.993631
+      },
+      "przelew": {
+        "documents": 10,
+        "correct_type": 10,
+        "exact": 7,
+        "tp": 51,
+        "fp": 3,
+        "fn": 3,
+        "f1": 0.944444
+      },
+      "ALL": {
+        "documents": 30,
+        "correct_type": 30,
+        "exact": 21,
+        "tp": 301,
+        "fp": 9,
+        "fn": 8,
+        "f1": 0.972536
+      }
+    }
+  },
+  "saved_scan_errors": {
+    "live": {
+      "matched_saved_documents": 30,
+      "fp_fn_by_field": {
+        "ZamowieniePubliczne/tytul": {
+          "fp": 1,
+          "fn": 1
+        },
+        "Zamawiajacy/[]/nazwa": {
+          "fp": 1,
+          "fn": 1
+        },
+        "Odwolujacy/[]/pelnomocnik/mail": {
+          "fp": 1,
+          "fn": 1
+        },
+        "Odwolujacy/[]/nazwa": {
+          "fp": 1,
+          "fn": 1
+        },
+        "Odwolujacy/[]/pelnomocnik/nazwa": {
+          "fp": 1,
+          "fn": 0
+        },
+        "Odwolujacy/[]/pelnomocnik/imie_nazwisko": {
+          "fp": 1,
+          "fn": 0
+        },
+        "Odwolujacy/[]/przez-pelnomocnika": {
+          "fp": 1,
+          "fn": 1
+        },
+        "OdwolanieKIO/miejscowosc": {
+          "fp": 1,
+          "fn": 1
+        },
+        "mocodawca/[]/data/nazwa": {
+          "fp": 1,
+          "fn": 0
+        },
+        "przelew_bankowy/tytul": {
+          "fp": 3,
+          "fn": 3
+        },
+        "przelew_bankowy/numer_transakcji": {
+          "fp": 1,
+          "fn": 0
+        },
+        "przelew_bankowy/z_rachunku": {
+          "fp": 1,
+          "fn": 1
+        }
+      }
+    },
+    "replay": {
+      "matched_saved_documents": 30,
+      "fp_fn_by_field": {
+        "ZamowieniePubliczne/tytul": {
+          "fp": 1,
+          "fn": 1
+        },
+        "Zamawiajacy/[]/nazwa": {
+          "fp": 1,
+          "fn": 1
+        },
+        "Odwolujacy/[]/pelnomocnik/mail": {
+          "fp": 1,
+          "fn": 1
+        },
+        "Odwolujacy/[]/nazwa": {
+          "fp": 1,
+          "fn": 1
+        },
+        "OdwolanieKIO/miejscowosc": {
+          "fp": 1,
+          "fn": 1
+        },
+        "mocodawca/[]/data/nazwa": {
+          "fp": 1,
+          "fn": 0
+        },
+        "przelew_bankowy/tytul": {
+          "fp": 3,
+          "fn": 3
+        }
+      }
+    }
+  },
+  "open_checks": [
+    "150-PDF live hosted hybrid on the proposed release",
+    "Native Windows execution",
+    "Docker image execution",
+    "Organizer hidden set"
+  ]
+}

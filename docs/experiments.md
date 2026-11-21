@@ -1,6 +1,6 @@
 # Earlier Qwen experiments and implementation decisions
 
-The hosted Scaleway scan measurement and current judging instructions are in the [README](README.md). The results below record the earlier Qwen setup and the UZP revisions used at the time.
+The hosted Scaleway scan measurement and current judging instructions are in the [README](../README.md). The results below record the earlier Qwen setup and the UZP revisions used at the time.
 
 **Earlier Qwen hybrid.** It copies amounts, names and account digits from labelled text and uses the team’s Qwen API for uncertain allegations, unfamiliar layouts and new classes. The submitted code achieved **99.75% exact-field micro-F1 on 180 public in-scope PDFs**. The first blind comparison scored **99.27%** on 36 PDFs for both hybrid and rules-only, and **78.42%** for full-document Qwen. This public experiment cannot establish the maximum possible hidden F1. The organizer’s separate hidden test contains real cases. [Task description, §§6–8](https://mudnibfuppwadjkynscc.supabase.co/storage/v1/object/public/task-files/057d36b5-cb92-4062-9393-983cb8a96088/files/aeabc57d-7420-4069-946e-2c4de71d87ed.pdf)
 
@@ -116,4 +116,4 @@ A sustained full-document benchmark lost its local server after 15 completed PDF
 2. Dla `OdwolanieKIO.czynnosc_powod_id = 6`, czy automat porównuje dosłownie `czynnosc_opis`? Słownik podaje „Odpowiedzi/wyjaśnienia do SWZ”, przykład 19 podaje „Odpowiedzi i wyjaśnienia do SWZ”. Który zapis obowiązuje?
 3. Jaki jest limit czasu na partię i na jeden PDF? Czy trzeba wcześniej przekazać adres HTTPS zespołu do listy dozwolonych?
 
-At the UZP stand, ask to inspect a scan, a case with several powers of attorney and a missing field, and how the scorer treats such fields. These are the examples most likely to contradict the public-set results. The subsequent hosted scan benchmark used the team’s Scaleway endpoint and private key. Machine-readable counts for each run are in [the benchmark results](benchmarks/public-rerun.json).
+At the UZP stand, ask to inspect a scan, a case with several powers of attorney and a missing field, and how the scorer treats such fields. These are the examples most likely to contradict the public-set results. The subsequent hosted scan benchmark used the team’s Scaleway endpoint and private key. Machine-readable counts for each run are in [the benchmark results](../benchmarks/public-rerun.json).

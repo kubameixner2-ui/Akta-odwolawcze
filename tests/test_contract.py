@@ -1,11 +1,14 @@
 import copy
+import errno
 import importlib.util
 import io
 import json
 import os
 import shutil
+import subprocess
+import sys
 import unittest
-from contextlib import redirect_stderr
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -14,7 +17,7 @@ import pymupdf  # type: ignore[import-untyped]
 from jsonschema import ValidationError
 
 import extractor
-from run import batch
+from run import batch, serve
 
 
 COMPLETE_BANK = ("Potwierdzenie transakcji\nRachunek nadawcy: 00112233445566778899001122\n"
@@ -28,6 +31,52 @@ def pdf(text: str) -> bytes:
 
 
 class ContractTests(unittest.TestCase):
+    def test_empty_input_explains_how_to_start(self) -> None:
+        with TemporaryDirectory() as temp, redirect_stderr(io.StringIO()) as message:
+            root = Path(temp)
+            (root/".gitkeep").touch()
+            self.assertEqual(batch(root, root/"output", "rules"), 0)
+            self.assertFalse((root/"output").exists())
+        self.assertEqual(message.getvalue().splitlines(),
+                         [f"No PDF files found in {root}. Add a PDF there or select a directory with --input."])
+
+    def test_missing_input_is_a_concise_cli_error(self) -> None:
+        with TemporaryDirectory() as temp:
+            source = Path(temp)/"missing"
+            command = [sys.executable, str(Path(extractor.__file__).with_name("run.py")), "--input", str(source)]
+            result = subprocess.run(command, capture_output=True, text=True, check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.stderr.strip(), f"Input directory does not exist: {source}")
+
+    def test_ui_prints_assigned_port_when_default_is_busy(self) -> None:
+        with patch("run.ThreadingHTTPServer") as bind, redirect_stdout(io.StringIO()) as output:
+            server = bind.return_value
+            server.server_port = 43721
+            bind.side_effect = [OSError(errno.EADDRINUSE, "busy"), server]
+            serve("rules", None)
+        self.assertEqual([call.args[0] for call in bind.call_args_list], [("127.0.0.1", 8765), ("127.0.0.1", 0)])
+        self.assertEqual(output.getvalue(), "http://127.0.0.1:43721\n")
+        server.serve_forever.assert_called_once_with()
+
+    def test_explicit_zero_prints_a_bound_port(self) -> None:
+        with patch("run.ThreadingHTTPServer.serve_forever"), redirect_stdout(io.StringIO()) as output:
+            serve("rules", 0)
+        self.assertRegex(output.getvalue(), r"^http://127\.0\.0\.1:[1-9]\d*\n$")
+
+    def test_busy_explicit_port_exits_without_advertising_a_url(self) -> None:
+        with patch("run.ThreadingHTTPServer", side_effect=OSError(errno.EADDRINUSE, "busy")) as bind:
+            with redirect_stdout(io.StringIO()) as output, self.assertRaisesRegex(SystemExit, "Port 8765 is already in use"):
+                serve("rules", 8765)
+        self.assertEqual(output.getvalue(), "")
+        bind.assert_called_once()
+
+    def test_unrelated_bind_error_preserves_the_cause(self) -> None:
+        with patch("run.ThreadingHTTPServer", side_effect=PermissionError(errno.EACCES, "denied")) as bind:
+            with redirect_stdout(io.StringIO()) as output, self.assertRaises(PermissionError):
+                serve("rules", None)
+        self.assertEqual(output.getvalue(), "")
+        bind.assert_called_once()
+
     def test_tree_opaque_names_repeated_type_stale_output(self) -> None:
         bank = pdf("Potwierdzenie transakcji\nKwota: 7,00 PLN\nData operacji: 2026-04-03")
         with TemporaryDirectory() as temp, redirect_stderr(io.StringIO()):

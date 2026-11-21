@@ -24,7 +24,7 @@ python3.13 -m venv .venv
 .venv/bin/python check_api.py
 ```
 
-Oczekiwany komunikat to `ok`. Test wykonuje rzeczywiste zapytanie z ograniczeniem odpowiedzi do schematu JSON. Błąd HTTP 401 lub 403 oznacza, że należy sprawdzić klucz oraz uprawnienia do projektu. W przypadku braku Pythona 3.13 w Ubuntu zobacz [instrukcję instalacji](README.md).
+Oczekiwany komunikat to `ok`. Test wykonuje rzeczywiste zapytanie z ograniczeniem odpowiedzi do schematu JSON. Błąd HTTP 401 lub 403 oznacza, że należy sprawdzić klucz oraz uprawnienia do projektu. W przypadku braku Pythona 3.13 w Ubuntu zobacz [instrukcję instalacji](../README.md).
 
 ## 3. Przetwórz dokumenty
 
@@ -46,4 +46,4 @@ Dla `input/sprawa_A/dokument.pdf` powstaje `output/sprawa_A/dokument.json`. Doku
 
 Uruchom ten sam interpreter z `run.py --ui` i otwórz adres wyświetlony w terminalu. Wybierz PDF, kliknij **Analizuj** i **Pobierz JSON**. Pobrany plik zostanie zapisany przez przeglądarkę. Zakończ sesję za pomocą **Ctrl+C**. Do oceny wsadowej służy polecenie z punktu 3.
 
-GPU oraz działające urządzenie uczestnika nie są wymagane przy uruchomieniu z działającym zewnętrznym API zespołu. [Specyfikacja UZP](https://github.com/Urzad-Zamowien-Publicznych/hacknation-2026/blob/7590db84f39281b36f774d14f8961cdeb2a0c4c4/README.md#L137-L158)
+GPU oraz działające urządzenie uczestnika nie są wymagane przy uruchomieniu z działającym zewnętrznym API zespołu. [Specyfikacja UZP](https://github.com/Urzad-Zamowien-Publicznych/hacknation-2026/blob/0b360a9da4b482a6a280696df6714404e0953505/README.md#L119-L192)
