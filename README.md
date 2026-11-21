@@ -17,7 +17,8 @@ Akta-odwolawcze/
 │   └── check_public.py
 ├── docs/                        # Verification, experiment history and jury guide
 │   ├── assets/
-│   │   └── parsoinator.png
+│   │   ├── parsoinator.png
+│   │   └── pdf-parsoinator-visual-pipeline.png
 │   ├── experiments.md
 │   ├── jury-pl.md
 │   └── verification.md
@@ -133,6 +134,10 @@ Output JSON uses the official Polish field names. A missing value is `null` wher
 
 Open the address printed by the server. Choose a PDF, run the analysis, then inspect the first-page preview beside its JSON and use the download link. The browser saves the result to its download location. Omit `--mode rules` to use the configured hybrid extractor. If the default port is busy the server prints a free port. Stop it with **Ctrl+C**.
 
+## Extraction pipeline
+
+![PDF classification, OCR, field extraction and JSON validation](docs/assets/pdf-parsoinator-visual-pipeline.png)
+
 ## Measured results
 
 The public training directory has **226 PDF paths** across three groups. The native and scan rows measure field extraction. Exclusions are scored by checking that the output file exists and contains zero bytes. The live and replay rows use the **same 30 scans**. [Public dataset][data] · [Measurement record](benchmarks/readiness.json)
@@ -156,7 +161,7 @@ On the 30 scans, bank transfers had the lowest live F1 at **91.74%**. After repl
 | Correct disposition | **140/150** | 10 supported scans were incorrectly empty. All 16 exclusions were correctly empty. |
 | Exact documents, including exclusions | **120/150** | 104 native, 0 scanned and 16 excluded documents matched. |
 
-The timing establishes CPU throughput for this public mix. The full 150-file **hosted hybrid** timing still needs a run with the team API on the judging setup. The organizer has placed the hardware specification under review. [Reproduce the timed run](docs/verification.md#run-the-150-pdf-check) · [Organizer’s timing rule][time]
+Run `.venv/bin/python scripts/check_public.py timing --mode hybrid` from the project root to fetch the pinned dataset and time the hosted batch. The full 150-file **hosted hybrid** timing still needs a run with the team API on the judging setup. The organizer has placed the hardware specification under review. [Reproduce the timed run](docs/verification.md#run-the-150-pdf-check) · [Organizer’s timing rule][time]
 
 ## Operate and extend
 
