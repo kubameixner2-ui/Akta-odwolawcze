@@ -60,6 +60,18 @@ Akta-odwolawcze/
 └── start-local-model.sh         # Optional local model for development
 ```
 
+## Extraction pipeline
+
+![PDF classification, OCR, field extraction and JSON validation](docs/assets/pdf-parsoinator-visual-pipeline.png)
+
+**PDF parsing pipeline.** The parser reads each PDF in a case folder, using local OCR when needed, and classifies it by content. Appeals, powers of attorney, and bank transfer confirmations proceed to field extraction. The same LLM can identify the document type when headings are unclear and resolve fields when extraction rules are insufficient. The parser cleans and validates each supported record, then writes one JSON file per PDF. UZP requires a matching `.json` file containing `{}` for all other document types.
+
+### Models used in the pipeline
+
+![Illustrative mean across one LLM and two local OCR networks](docs/assets/three-model-average.png)
+
+Mistral Small 3.2 24B handles classification and extraction. Local Tesseract uses Polish (286,609 weights) and English (385,807 weights). The illustration uses example OCR sizes to obtain 8.001B. UZP's archived LLM table gives the single 24B model 12/20. The final model-size rule is unconfirmed.
+
 ## Run your first case
 
 PDF Parsoinator reads a folder of Polish procurement case files and produces one result per PDF. It recognizes appeals to the National Appeals Chamber (KIO), powers of attorney and bank transfer confirmations. It preserves filenames and case folders. Scanned pages can be read locally using the bundled Polish and English OCR data.
@@ -134,16 +146,6 @@ Output JSON uses the official Polish field names. A missing value is `null` wher
 | `.venv/bin/python run.py --ui --mode rules` | `.\.venv\Scripts\python.exe run.py --ui --mode rules` |
 
 Open the address printed by the server. Choose a PDF, run the analysis, then inspect the first-page preview beside its JSON and use the download link. The browser saves the result to its download location. Omit `--mode rules` to use the configured hybrid extractor. If the default port is busy the server prints a free port. Stop it with **Ctrl+C**.
-
-## Extraction pipeline
-
-![PDF classification, OCR, field extraction and JSON validation](docs/assets/pdf-parsoinator-visual-pipeline.png)
-
-### Models used in the pipeline
-
-![Illustrative mean across one LLM and two local OCR networks](docs/assets/three-model-average.png)
-
-Mistral Small 3.2 24B handles classification and extraction. Local Tesseract uses Polish (286,609 weights) and English (385,807 weights). The illustration uses example OCR sizes to obtain 8.001B. UZP's archived LLM table gives the single 24B model 12/20. The final model-size rule is unconfirmed.
 
 ## Measured results
 
