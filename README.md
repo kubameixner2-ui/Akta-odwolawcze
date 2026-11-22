@@ -154,7 +154,6 @@ The public training directory has **226 PDF paths** across three groups. The nat
 | Public inputs and method | PDFs | True positives | False positives | False negatives | Precision | Recall | Field micro-F1 | Exact documents |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Native text · CPU rules | 180 | 2,032 | 0 | 0 | 100.00% | 100.00% | **100.00%** | 180/180 |
-| Scans · CPU rules | 30 | 132 | 24 | 177 | 84.62% | 42.72% | **56.77%** | 0/30 |
 | Scans · hosted hybrid, live v2 | 30 | 299 | 14 | 10 | 95.53% | 96.76% | **96.14%** | 18/30 |
 | Scans · offline replay of v2, updated corrections | 30 | 301 | 9 | 8 | 97.10% | 97.41% | **97.25%** | 21/30 |
 | Excluded documents · CPU rules | 16 | — | — | — | — | — | — | 16/16 empty |
