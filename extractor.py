@@ -15,7 +15,7 @@ import pymupdf  # type: ignore[import-untyped]
 from dotenv import load_dotenv
 from jsonschema import Draft202012Validator
 
-from fields import CAUSE_PATTERNS, LAWYER, Record, appeal, first_action, flat, power, transfer
+from fields import CAUSE_PATTERNS, LAWYER, Record, appeal, classify_headings, first_action, flat, power, transfer
 from names import normalize_names
 from scan_fields import reconcile_scan
 
@@ -115,32 +115,9 @@ def completion(instruction: str, source: str, schema: Record) -> Record:
 
 
 def classify(pages: list[str], use_api: bool) -> str | None:
-    def key(value: str) -> str:
-        return re.sub(r"[^\w]", "", value.casefold())
-
-    first_page = pages[0] if pages else ""
-    start = flat(first_page[:1800]).casefold()
-    outside_original_classes = bool(
-        start.startswith(("ogłoszenie o zamówieniu", "pismo okólne")) or "see the notice on ted website" in start[:450] or
-        re.search(r"^sygn\.?\s*akt.{0,85}\b(?:postanowienie|wyrok)\b", start) or
-        ("minister" in start and re.search(r"(?im)^\s*decyzja\s+nr\b", first_page[:1400]))
-    )
-    # Numbered lecture decks repeat a slide heading while explaining proceedings.
-    if len(pages) >= 3 and len(start) < 200 and re.search(r"\b(?:cz\.|część)\s*(?:\d+|[ivx]+)\.?$", start):
-        headings = [p.strip().split("\n", 1)[0].casefold() for p in pages[1:3]]
-        outside_original_classes |= bool(headings[0]) and headings[0] == headings[1]
-    candidates = SPECS if not outside_original_classes else {
-        k: s for k, s in SPECS.items() if k not in ("odwolanie", "pelnomocnictwo", "przelew")
-    }
-    if not candidates:
-        return None
-    titles = {key(h): n for n, s in candidates.items() for h in s["headings"]}
-    for line in "\n".join(pages[:2]).splitlines():
-        heading = key(re.sub(r"(?i)^\s*dotyczy:\s*", "", line))
-        if heading in titles:
-            return titles[heading]
-    if not use_api or not start:
-        return None
+    kind, candidates = classify_headings(pages, SPECS)
+    if kind or not use_api or not candidates:
+        return kind
     schema = {"type": "object", "properties": {"klasa": {"enum": [*candidates, "inne"]}}, "required": ["klasa"], "additionalProperties": False}
     classes = {k: s["label"] for k, s in candidates.items()}
     kind = completion("Rozpoznaj gatunek dokumentu na podstawie jego własnej treści, pomiń wzmianki o załącznikach. "

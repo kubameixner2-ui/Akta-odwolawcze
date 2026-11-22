@@ -198,3 +198,30 @@ def power(text: str) -> Record:
         owners.append({"data": {"typ": owner_type, "imie_nazwisko": person, "nazwa": name, "krs": krs, "nip": nip},
             "podpisujacy": [{"imie_nazwisko": x} for x in dict.fromkeys(signed)]})
     return {"mocodawca": owners, "pelnomocnicy": appointees(text)}
+
+
+def classify_headings(pages: list[str], specs: dict[str, Record]) -> tuple[str | None, dict[str, Record]]:
+    """Return a matched class and the classes eligible for model fallback."""
+    def key(value: str) -> str:
+        return re.sub(r"[^\w]", "", value.casefold())
+
+    first_page = pages[0] if pages else ""
+    start = flat(first_page[:1800]).casefold()
+    outside_original_classes = bool(
+        start.startswith(("ogłoszenie o zamówieniu", "pismo okólne")) or "see the notice on ted website" in start[:450] or
+        re.search(r"^sygn\.?\s*akt.{0,85}\b(?:postanowienie|wyrok)\b", start) or
+        ("minister" in start and re.search(r"(?im)^\s*decyzja\s+nr\b", first_page[:1400]))
+    )
+    # Numbered lecture decks repeat a slide heading while explaining proceedings.
+    if len(pages) >= 3 and len(start) < 200 and re.search(r"\b(?:cz\.|część)\s*(?:\d+|[ivx]+)\.?$", start):
+        headings = [p.strip().split("\n", 1)[0].casefold() for p in pages[1:3]]
+        outside_original_classes |= bool(headings[0]) and headings[0] == headings[1]
+    candidates = specs if not outside_original_classes else {
+        k: s for k, s in specs.items() if k not in ("odwolanie", "pelnomocnictwo", "przelew")
+    }
+    titles = {key(h): n for n, s in candidates.items() for h in s["headings"]}
+    for line in "\n".join(pages[:2]).splitlines():
+        heading = key(re.sub(r"(?i)^\s*dotyczy:\s*", "", line))
+        if heading in titles:
+            return titles[heading], candidates
+    return None, candidates if start else {}

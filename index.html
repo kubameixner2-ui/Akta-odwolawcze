@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pl">
+<html lang="pl" data-engine="python">
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Akta odwoławcze · PDF → JSON</title>
 <style>
@@ -23,7 +23,8 @@ a{color:var(--brand);text-underline-offset:3px}[hidden]{display:none!important}:
 </style>
 <main>
 <header><h1>Akta odwoławcze</h1><span class="format">PDF → JSON</span></header>
-<div class="bar"><input aria-label="Wybierz dokument PDF" type="file" id="file" accept=".pdf,application/pdf"><button id="go" disabled>Analizuj</button><output id="status" aria-live="polite"></output></div>
+<p id="mode" hidden>Wersja przeglądarkowa · Reguły i OCR działają na tym urządzeniu. Wybrany PDF pozostaje w przeglądarce.</p>
+<div class="bar"><input aria-label="Wybierz dokument PDF" type="file" id="file" accept=".pdf,application/pdf"><button id="go" disabled>Analizuj</button><button id="sample" hidden>Wypróbuj przykład</button><output id="status" aria-live="polite"></output></div>
 <div class="grid">
 <section class="pane"><header><h2>Dokument</h2><a id="original" hidden target="_blank" rel="noopener">Otwórz cały PDF</a></header><div class="surface paper"><span id="empty">Wybierz PDF do analizy.</span><img alt="Pierwsza strona wybranego PDF" id="pdf" hidden></div></section>
 <section class="pane"><header><h2>Wynik</h2><a id="download" hidden>Pobierz JSON</a></header><div class="surface json"><pre id="json" aria-label="Wynik JSON"></pre></div></section>
@@ -31,35 +32,75 @@ a{color:var(--brand);text-underline-offset:3px}[hidden]{display:none!important}:
 <script>
 const byId = id => document.getElementById(id);
 const file = byId('file'), go = byId('go'), result = byId('json'), pdf = byId('pdf'), link = byId('download'), status = byId('status');
-let pdfUrl, jsonUrl, imageUrl;
-file.onchange = async () => {
+const inBrowser = document.documentElement.dataset.engine === 'browser';
+const sample = byId('sample');
+sample.hidden = byId('mode').hidden = !inBrowser;
+let selected, pdfUrl, jsonUrl, imageUrl;
+
+async function serverRequest(path, document) {
+  const response = await fetch(path, {method:'POST', headers:{'Content-Type':'application/pdf'}, body:document});
+  if (!response.ok) throw new Error(await response.text());
+  return response;
+}
+
+async function selectPdf(document) {
+  selected = document;
   for (const url of [pdfUrl, jsonUrl, imageUrl]) if (url) URL.revokeObjectURL(url);
-  const selected = file.files[0];
-  go.disabled = !selected; pdf.hidden = true; byId('empty').hidden = false;
+  go.disabled = file.disabled || !selected; pdf.hidden = true; byId('empty').hidden = false;
   byId('original').hidden = !selected; byId('empty').textContent = selected ? 'Wczytywanie podglądu…' : 'Wybierz PDF do analizy.';
   result.textContent = ''; status.textContent = ''; link.hidden = true;
   if (!selected) return;
   pdfUrl = URL.createObjectURL(selected); byId('original').href = pdfUrl;
   try {
-    const res = await fetch('/preview', {method:'POST', headers:{'Content-Type':'application/pdf'}, body:selected});
-    if (!res.ok) throw new Error();
-    const preview = await res.blob();
-    if (file.files[0] !== selected) return;
+    const preview = inBrowser
+      ? await (await import('./pdf-reader.mjs')).preview(document)
+      : await (await serverRequest('/preview', document)).blob();
+    if (selected !== document) return;
     imageUrl = URL.createObjectURL(preview); pdf.src = imageUrl; pdf.hidden = false; byId('empty').hidden = true;
-  } catch { if (file.files[0] === selected) byId('empty').textContent = 'Podgląd niedostępny. Otwórz cały PDF.'; }
-};
-go.onclick = async () => {
-  const selected = file.files[0]; file.disabled = go.disabled = true; link.hidden = true;
-  result.textContent = ''; status.textContent = 'Analiza w toku…';
+  } catch { if (selected === document) byId('empty').textContent = 'Podgląd niedostępny. Otwórz cały PDF.'; }
+}
+file.onchange = () => selectPdf(file.files[0]);
+
+function busy(active) {
+  file.disabled = sample.disabled = active;
+  go.disabled = active || !selected;
+}
+
+async function analyze() {
+  busy(true); link.hidden = true;
+  result.textContent = ''; status.textContent = inBrowser ? 'Wczytywanie narzędzi do analizy…' : 'Analiza w toku…';
   try {
-    const res = await fetch('/extract', {method:'POST', headers:{'Content-Type':'application/pdf'}, body:selected});
-    if (!res.ok) throw new Error(await res.text());
-    const text = await res.text(); result.textContent = text;
+    let text, unsupported;
+    if (inBrowser) {
+      const {readPages} = await import('./pdf-reader.mjs');
+      const {extractFields} = await import('./field-rules.mjs');
+      const pages = await readPages(selected, message => { status.textContent = message; });
+      status.textContent = 'Odczytywanie pól dokumentu…';
+      const record = await extractFields(pages);
+      unsupported = Object.keys(record).length === 0;
+      text = JSON.stringify(record, null, 2);
+    } else {
+      const res = await serverRequest('/extract', selected);
+      text = await res.text(); unsupported = res.status === 204 || text.trim() === '{}';
+    }
+    result.textContent = text;
     if (jsonUrl) URL.revokeObjectURL(jsonUrl);
     jsonUrl = URL.createObjectURL(new Blob([text], {type:'application/json'}));
     link.href = jsonUrl; link.download = selected.name.replace(/\.pdf$/i,'') + '.json'; link.hidden = false;
-    status.textContent = res.status === 204 ? 'Dokument poza obsługiwanymi klasami. Gotowy pusty plik JSON.' : 'Analiza zakończona.';
+    status.textContent = unsupported ? 'Nie rozpoznano obsługiwanego typu dokumentu.' : 'Analiza zakończona · ' + selected.name;
   } catch(err) { status.textContent = 'Błąd analizy: ' + err.message; }
-  finally { file.disabled = go.disabled = false; }
+  finally { busy(false); }
+}
+go.onclick = analyze;
+sample.onclick = async () => {
+  busy(true); status.textContent = 'Wczytywanie przykładu…';
+  try {
+    const response = await fetch('./example-transfer.pdf');
+    if (!response.ok) throw new Error('Nie można wczytać przykładu.');
+    file.value = '';
+    await selectPdf(new File([await response.blob()], 'example-transfer.pdf', {type:'application/pdf'}));
+    await analyze();
+  } catch(err) { status.textContent = 'Błąd: ' + err.message; }
+  finally { busy(false); }
 };
 </script></html>

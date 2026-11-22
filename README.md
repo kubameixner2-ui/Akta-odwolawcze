@@ -13,7 +13,11 @@ Akta-odwolawcze/
 │   ├── odwolanie.json
 │   ├── pelnomocnictwo.json
 │   └── przelew.json
-├── scripts/                     # Reproducible public checks
+├── .github/workflows/pages.yml   # Publish the browser parser to GitHub Pages
+├── scripts/                     # Release and verification commands
+│   ├── check-pages.py
+│   ├── build-pages.sh
+│   ├── pages-vendor.sh
 │   └── check_public.py
 ├── docs/                        # Verification, experiment history and jury guide
 │   ├── assets/
@@ -22,6 +26,10 @@ Akta-odwolawcze/
 │   │   ├── pdf-browser-review.png
 │   │   ├── pdf-parsoinator-visual-pipeline.png
 │   │   └── three-model-average.png
+│   ├── browser_rules.py
+│   ├── example-transfer.pdf
+│   ├── field-rules.mjs
+│   ├── pdf-reader.mjs
 │   ├── experiments.md
 │   ├── jury-pl.md
 │   └── verification.md
@@ -153,6 +161,12 @@ The default mode is `hybrid`. It reads the PDF on the CPU and uses rules for rec
 Output JSON uses the official Polish field names. A missing value is `null` where the schema permits it. An excluded PDF gets a zero-byte `.json` at the corresponding path. Batch errors name the affected file on standard error and return a nonzero exit code. UZP requires **150 PDFs within 45 minutes**, CPU-capable execution, and an API with EU/EEA processing for hosted inference. [Current judging specification][spec] · [45-minute limit][time] · [Scaleway deployment region][provider] · [Model card][model]
 
 ### 4. Review a PDF in the browser
+
+**[Open the browser parser](https://kubameixner2-ui.github.io/Akta-odwolawcze/)**. Select **Wypróbuj przykład** to parse a sample transfer for **200.00 PLN**, or choose your own PDF and select **Analizuj**. Compare the source with the JSON, then use **Pobierz JSON** to save it.
+
+The Pages edition loads its parser and OCR tools on first use. It reads your PDF on your device, applies the project’s heading and field rules and returns `{}` for unrecognized documents. The hosted-hybrid benchmark below measures the Python application, which also has Mistral assistance and scan-specific corrections. In Chromium, all three native PDFs from public case 01 matched their references. The first public scan of each class was recognized, with field differences in all three results. [Public fixtures][data]
+
+**Run the Python application locally**
 
 | Linux or WSL | Windows PowerShell |
 | --- | --- |
