@@ -1,0 +1,48 @@
+{
+  "reference_commit": "eadffbce531eeac876d0f7e62c1cc6e857b05796",
+  "mode": "hybrid",
+  "batch_exit": 0,
+  "pdfs": 226,
+  "outputs": 226,
+  "missing": 0,
+  "unexpected": 0,
+  "format_errors": {},
+  "native": {
+    "documents": 180,
+    "exact": 132,
+    "tp": 1936,
+    "fp": 96,
+    "fn": 96,
+    "field_micro_f1": 0.952756
+  },
+  "scans": {
+    "documents": 30,
+    "exact": 21,
+    "tp": 301,
+    "fp": 9,
+    "fn": 8,
+    "field_micro_f1": 0.972536
+  },
+  "all_210_labeled": {
+    "documents": 210,
+    "exact": 153,
+    "tp": 2237,
+    "fp": 105,
+    "fn": 104,
+    "field_micro_f1": 0.95537
+  },
+  "unsupported_empty_objects": 16,
+  "unsupported_total": 16,
+  "all_226_exact": 169,
+  "routes": {
+    "excluded": 16,
+    "rules": 172,
+    "first_claim_api": 8,
+    "full_api": 30
+  },
+  "container": {
+    "image_id": "sha256:09328950ce79d458e741ff0c0a0e98d0d9ae3086625cb90fd48bf17dabbc0796",
+    "started": "2026-11-22T09:08:37.524233567Z",
+    "finished": "2026-11-22T09:18:50.505121802Z"
+  }
+}

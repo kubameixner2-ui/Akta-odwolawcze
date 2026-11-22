@@ -34,6 +34,7 @@ Akta-odwolawcze/
 │   ├── jury-pl.md
 │   └── verification.md
 ├── benchmarks/                  # Measured results and historical experiment patches
+│   ├── azure-226-live.json
 │   ├── first-claim.patch
 │   ├── ocr-company-suffix.patch
 │   ├── public-rerun.json
@@ -158,7 +159,7 @@ These are generated demonstration files. The repository ships empty `input/` and
 
 The default mode is `hybrid`. It reads the PDF on the CPU and uses rules for recognized fields. When it needs model assistance it sends extracted text to the configured API. `--mode rules` runs entirely on the CPU without an API key. `--mode llm` requests model extraction for each document classified as supported. Use `--trace` for the extraction route, OCR page numbers and page references for literal matches on standard error. [Extraction and routing](extractor.py)
 
-Output JSON uses the official Polish field names. A missing value is `null` where the schema permits it. An excluded PDF gets a zero-byte `.json` at the corresponding path. Batch errors name the affected file on standard error and return a nonzero exit code. UZP requires **150 PDFs within 45 minutes**, CPU-capable execution, and an API with EU/EEA processing for hosted inference. [Current judging specification][spec] · [45-minute limit][time] · [Scaleway deployment region][provider] · [Model card][model]
+Output JSON uses the official Polish field names. A missing value is `null` where the schema permits it. The batch CLI in this checkout writes a zero-byte file for an excluded PDF. The evaluated Azure version writes `{}` at the corresponding path. Batch errors name the affected file on standard error and return a nonzero exit code. UZP requires **150 PDFs within 45 minutes**, CPU-capable execution, and an API with EU/EEA processing for hosted inference. [Current judging specification][spec] · [45-minute limit][time] · [Scaleway deployment region][provider] · [Model card][model]
 
 ### 4. Review a PDF in the browser
 
@@ -180,27 +181,19 @@ Open the address printed by the server. Choose a PDF, run the analysis, then ins
 
 ## Measured results
 
-The public training directory has **226 PDF paths** across three groups. The native and scan rows measure field extraction. Exclusions are scored by checking that the output file exists and contains zero bytes. The live and replay rows use the **same 30 scans**. [Public dataset][data] · [Measurement record](benchmarks/readiness.json)
+**99.64% field micro-F1 after correcting 96 bank-account prefixes in the references, and 95.54% against the published JSONs.** Both scores use the same live predictions for all 210 labeled PDFs. On 22 November 2026, the Azure judging VM processed all **226 public PDFs in 10 min 13 s**. All 226 outputs were present, and all **16/16 unsupported PDFs** produced `{}`. [Raw Azure report](benchmarks/azure-226-live.json) · [Public inputs and references](https://github.com/Urzad-Zamowien-Publicznych/hacknation-2026/tree/eadffbce531eeac876d0f7e62c1cc6e857b05796/dane)
 
-| Public inputs and method | PDFs | True positives | False positives | False negatives | Precision | Recall | Field micro-F1 | Exact documents |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Native text · CPU rules | 180 | 2,032 | 0 | 0 | 100.00% | 100.00% | **100.00%** | 180/180 |
-| Scans · hosted hybrid, live v2 | 30 | 299 | 14 | 10 | 95.53% | 96.76% | **96.14%** | 18/30 |
-| Scans · offline replay of v2, updated corrections | 30 | 301 | 9 | 8 | 97.10% | 97.41% | **97.25%** | 21/30 |
-| Excluded documents · CPU rules | 16 | — | — | — | — | — | — | 16/16 empty |
+| Evaluation set | Reference used | PDFs | TP | FP | FN | Precision | Recall | Field micro-F1 | Exact JSONs |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| **All labeled PDFs** | Prefix-corrected diagnostic | 210 | 2,333 | 9 | 8 | 99.62% | 99.66% | **99.64%** | 201/210 |
+| **All labeled PDFs** | Published JSON | 210 | 2,237 | 105 | 104 | 95.52% | 95.56% | **95.54%** | 153/210 |
+| Native text | Prefix-corrected diagnostic | 180 | 2,032 | 0 | 0 | 100.00% | 100.00% | **100.00%** | 180/180 |
+| Native text | Published JSON | 180 | 1,936 | 96 | 96 | 95.28% | 95.28% | **95.28%** | 132/180 |
+| Scans | Published JSON | 30 | 301 | 9 | 8 | 97.10% | 97.41% | **97.25%** | 21/30 |
 
-On the 30 scans, bank transfers had the lowest live F1 at **91.74%**. After replay, three transfer titles still differed from the references. Those three values account for **6 of the 17** remaining false positives and false negatives. Replaying corrects saved predictions using the PDF and OCR. A fresh API run can produce different values. The organizer scores a separate, undisclosed test set. [Per-class scores, field errors and method](docs/verification.md#where-the-scan-errors-are) · [Official testing procedure][spec]
+**Why the scores differ.** In 48 native transfer PDFs, both account numbers have a printed `PL` prefix. The extractor preserved it, and the reference JSONs omitted it. Restoring those two prefixes per document converts 96 false-positive/false-negative pairs into 96 true positives. The diagnostic uses the original references for every other field. The 16 unsupported documents are checked separately. [Example transfer PDF](https://github.com/Urzad-Zamowien-Publicznych/hacknation-2026/blob/eadffbce531eeac876d0f7e62c1cc6e857b05796/dane/przyklad_01/przelew.pdf) · [Published JSON for the same transfer](https://github.com/Urzad-Zamowien-Publicznych/hacknation-2026/blob/eadffbce531eeac876d0f7e62c1cc6e857b05796/dane/przyklad_01/przelew.json)
 
-| Timed batch · CPU rules | Measured | Interpretation |
-| --- | ---: | --- |
-| 104 native PDFs + 30 scans + 16 exclusions | 150 paths | 145 distinct PDF contents |
-| Wall time | **325.17 s** | 5 min 25.17 s for the batch CLI. The limit is 2,700 s. |
-| Mean processing time | **2.17 s/PDF** | The limit allows 18 s/PDF on average. |
-| Output files at expected paths | **150/150** | All 124 nonempty files contained schema-valid JSON. |
-| Correct disposition | **140/150** | 10 supported scans were incorrectly empty. All 16 exclusions were correctly empty. |
-| Exact documents, including exclusions | **120/150** | 104 native, 0 scanned and 16 excluded documents matched. |
-
-Run `.venv/bin/python scripts/check_public.py timing --mode hybrid` from the project root to fetch the pinned dataset and time the hosted batch. The full 150-file **hosted hybrid** timing still needs a run with the team API on the judging setup. The organizer has placed the hardware specification under review. [Reproduce the timed run](docs/verification.md#run-the-150-pdf-check) · [Organizer’s timing rule][time]
+The earlier CPU rules run matched **180/180** native references as published. On the same 30 scans, the earlier live model run scored **96.14%** and its offline replay scored **97.25%**. The scan row above comes from the fresh Azure run. The organizers evaluate a separate hidden set. [CPU benchmark record](benchmarks/readiness.json) · [Earlier live scan result](benchmarks/scaleway-scans-v2-live.json) · [Replay result](benchmarks/scaleway-scans-v3-replay.json)
 
 ## Operate and extend
 
