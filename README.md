@@ -17,6 +17,7 @@ Akta-odwolawcze/
 │   └── check_public.py
 ├── docs/                        # Verification, experiment history and jury guide
 │   ├── assets/
+│   │   ├── Announce_Sovereignty_scaleway.png
 │   │   ├── parsoinator.png
 │   │   ├── pdf-parsoinator-visual-pipeline.png
 │   │   └── three-model-average.png
@@ -71,6 +72,17 @@ Akta-odwolawcze/
 ![Illustrative mean across one LLM and two local OCR networks](docs/assets/three-model-average.png)
 
 Mistral Small 3.2 24B handles classification and extraction. Local Tesseract uses Polish (286,609 weights) and English (385,807 weights). The illustration uses example OCR sizes to obtain 8.001B. UZP's archived LLM table gives the single 24B model 12/20. The final model-size rule is unconfirmed.
+
+### European LLM hosting with Scaleway
+
+![Scaleway European cloud infrastructure](docs/assets/Announce_Sovereignty_scaleway.png)
+
+Scaleway hosts **Mistral Small 3.2 24B Instruct 2506** for the hybrid extractor. PDF parsing and OCR run locally. When the rules need help with classification or field extraction, the application sends extracted text to the model. Scaleway lists Paris, France, as the hosting location for its serverless models. [Hosting FAQ][provider] · [Scaleway model catalog](https://www.scaleway.com/en/docs/generative-apis/reference-content/supported-models/)
+
+| API setting | Project configuration |
+| --- | --- |
+| Base URL | `https://api.scaleway.ai/v1` |
+| Model ID | `mistral/mistral-small-3.2-24b-instruct-2506:fp8` |
 
 ## Run your first case
 
