@@ -18,7 +18,8 @@ Akta-odwolawcze/
 ├── docs/                        # Verification, experiment history and jury guide
 │   ├── assets/
 │   │   ├── parsoinator.png
-│   │   └── pdf-parsoinator-visual-pipeline.png
+│   │   ├── pdf-parsoinator-visual-pipeline.png
+│   │   └── three-model-average.png
 │   ├── experiments.md
 │   ├── jury-pl.md
 │   └── verification.md
@@ -137,6 +138,12 @@ Open the address printed by the server. Choose a PDF, run the analysis, then ins
 ## Extraction pipeline
 
 ![PDF classification, OCR, field extraction and JSON validation](docs/assets/pdf-parsoinator-visual-pipeline.png)
+
+### Models used in the pipeline
+
+![Illustrative mean across one LLM and two local OCR networks](docs/assets/three-model-average.png)
+
+Mistral Small 3.2 24B handles classification and extraction. Local Tesseract uses Polish (286,609 weights) and English (385,807 weights). The illustration uses example OCR sizes to obtain 8.001B. UZP's archived LLM table gives the single 24B model 12/20. The final model-size rule is unconfirmed.
 
 ## Measured results
 
