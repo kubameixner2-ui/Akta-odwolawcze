@@ -19,6 +19,7 @@ Akta-odwolawcze/
 │   ├── assets/
 │   │   ├── Announce_Sovereignty_scaleway.png
 │   │   ├── parsoinator.png
+│   │   ├── pdf-browser-review.png
 │   │   ├── pdf-parsoinator-visual-pipeline.png
 │   │   └── three-model-average.png
 │   ├── experiments.md
@@ -158,6 +159,10 @@ Output JSON uses the official Polish field names. A missing value is `null` wher
 | `.venv/bin/python run.py --ui --mode rules` | `.\.venv\Scripts\python.exe run.py --ui --mode rules` |
 
 Open the address printed by the server. Choose a PDF, run the analysis, then inspect the first-page preview beside its JSON and use the download link. The browser saves the result to its download location. Omit `--mode rules` to use the configured hybrid extractor. If the default port is busy the server prints a free port. Stop it with **Ctrl+C**.
+
+![Bank transfer PDF on the left and extracted JSON on the right](docs/assets/pdf-browser-review.png)
+
+*Check the transfer amount and date against the PDF, then select **Pobierz JSON** to download the record.*
 
 ## Measured results
 
